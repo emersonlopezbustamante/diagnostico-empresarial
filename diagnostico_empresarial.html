@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Empresarial – Comfenalco Antioquia</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Source+Sans+3:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{--verde:#006847;--verde-claro:#e8f4ef;--verde-pist:#8DC63F;--dorado:#F2A900;--rojo:#C8102E;--gris:#3a3a3a;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Source Sans 3',sans-serif;background:linear-gradient(160deg,#004d34 0%,#006847 50%,#005a3c 100%);min-height:100vh;color:var(--gris);}
+  header{background:white;padding:10px 24px;display:flex;align-items:center;gap:16px;box-shadow:0 4px 16px rgba(0,0,0,0.18);border-bottom:3px solid var(--verde-pist);}
+  .hdiv{width:1px;height:46px;background:var(--verde-pist);}
+  .container{max-width:820px;margin:0 auto;padding:26px 16px 60px;}
+  .card{background:white;border-radius:16px;padding:26px 28px;box-shadow:0 6px 30px rgba(0,0,0,0.18);margin-bottom:20px;}
+  .card-title{font-family:'Playfair Display',serif;font-size:20px;color:var(--verde);margin-bottom:8px;}
+  .seccion-tag{display:inline-block;background:var(--verde);color:white;font-size:11px;font-weight:700;padding:3px 12px;border-radius:20px;margin-bottom:12px;}
+  .seccion-form{display:none;animation:fadeIn 0.3s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  .form-grid.one{grid-template-columns:1fr;}
+  .form-group{display:flex;flex-direction:column;gap:4px;}
+  .form-group label{font-size:12.5px;font-weight:600;color:var(--verde);}
+  .req{color:var(--rojo);margin-left:2px;}
+  .form-group input,.form-group select,.form-group textarea{padding:9px 12px;border:2px solid #d0e8dc;border-radius:9px;font-size:14px;font-family:'Source Sans 3',sans-serif;outline:none;transition:border-color 0.2s;background:white;color:var(--gris);}
+  .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--verde);}
+  .field-err{color:var(--rojo);font-size:11.5px;margin-top:3px;display:none;}
+  .input-invalid{border-color:var(--rojo)!important;}
+  .prog-wrap{background:#e0e0e0;border-radius:20px;height:6px;margin-bottom:20px;overflow:hidden;}
+  .prog-bar{height:100%;background:linear-gradient(90deg,var(--verde),var(--verde-pist));border-radius:20px;transition:width 0.4s;}
+  .prog-txt{font-size:12px;color:#aaa;text-align:right;margin-bottom:5px;}
+  /* Preguntas de diagnóstico con opciones */
+  .pregunta-diag{margin-bottom:22px;padding:16px;border-radius:12px;background:#f9fffe;border:1.5px solid #d0e8dc;}
+  .pregunta-diag p{font-size:14px;font-weight:600;color:#333;margin-bottom:12px;line-height:1.5;}
+  .opciones-diag{display:flex;flex-direction:column;gap:8px;}
+  .opcion-btn{display:flex;align-items:center;gap:10px;padding:10px 14px;border:2px solid #d0e8dc;border-radius:9px;cursor:pointer;transition:all 0.2s;background:white;}
+  .opcion-btn:hover{border-color:var(--verde);background:var(--verde-claro);}
+  .opcion-btn.selected{border-color:var(--verde);background:var(--verde);color:white;}
+  .opcion-btn.selected .opcion-radio{background:white;border-color:white;}
+  .opcion-radio{width:16px;height:16px;border-radius:50%;border:2px solid #aaa;flex-shrink:0;transition:all 0.2s;}
+  .opcion-btn.selected .opcion-radio{background:white;border-color:white;}
+  .opcion-label{font-size:13px;font-weight:600;}
+  .opcion-desc{font-size:12px;opacity:0.85;}
+  .pregunta-diag.sin-responder{border-color:var(--rojo);background:#fff5f5;}
+  .err-bloque{display:none;background:#fff0f2;border:1.5px solid var(--rojo);color:var(--rojo);border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:14px;font-weight:600;}
+  .nav-btns{display:flex;justify-content:space-between;gap:12px;margin-top:20px;}
+  .btn{padding:12px 26px;border:none;border-radius:30px;font-size:15px;font-weight:600;font-family:'Source Sans 3',sans-serif;cursor:pointer;transition:all 0.2s;}
+  .btn-prev{background:#eee;color:#666;}
+  .btn-prev:hover{background:#ddd;}
+  .btn-next{background:var(--verde);color:white;flex:1;}
+  .btn-next:hover{background:#005538;}
+  .btn-submit{background:var(--rojo);color:white;flex:1;}
+  .btn-submit:hover{background:#a00e25;}
+  .gracias{text-align:center;padding:50px 20px;display:none;}
+  .gracias .ico{font-size:60px;margin-bottom:16px;}
+  .gracias h2{font-family:'Playfair Display',serif;font-size:24px;color:#fff;margin-bottom:10px;}
+  .btn-descarga{display:inline-block;margin:10px 6px 0;padding:12px 28px;border:none;border-radius:10px;font-size:14px;font-weight:600;font-family:'Source Sans 3',sans-serif;cursor:pointer;transition:all 0.2s;}
+  .btn-pdf2{background:var(--rojo);color:white;}
+  .btn-pdf2:hover{background:#a00e25;}
+  .btn-excel2{background:#1d6f42;color:white;}
+  .btn-excel2:hover{background:#155232;}
+  @media(max-width:580px){.form-grid{grid-template-columns:1fr;} header{padding:10px 12px;gap:10px;}}
+  .logo-spe{height:52px;object-fit:contain;}
+  .logo-agencia{height:46px;object-fit:contain;}
+  .nivel-tag{display:inline-block;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;}
+  .nivel-basico{background:#fce4ec;color:#c62828;}
+  .nivel-medio{background:#fff8e1;color:#f57f17;}
+  .nivel-alto{background:#e8f5e9;color:#2e7d32;}
+</style>
+</head>
+<body>
+<header>
+  <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Comfenalco_Antioquia_logo.svg/320px-Comfenalco_Antioquia_logo.svg.png" alt="Comfenalco Antioquia" class="logo-spe" onerror="this.style.display='none'">
+  <div class="hdiv"></div>
+  <div>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:#006847;font-weight:700;">Agencia de Empleo y Emprendimiento</div>
+    <div style="font-size:11px;color:#555;">Diagnóstico Empresarial · Comfenalco Antioquia</div>
+  </div>
+</header>
+
+<div class="container">
+<div class="card" id="introCard">
+  <h1 class="card-title">Diagnóstico Empresarial Integral</h1>
+  <p style="font-size:13.5px;color:#666;line-height:1.7">Este diagnóstico permite identificar las necesidades de su empresa en áreas clave: <strong>SST, riesgos psicosociales, gestión administrativa, legal, clima organizacional, capacitación y talento humano</strong>. Al finalizar recibirá un informe PDF con recomendaciones de servicios de Comfenalco Antioquia.</p>
+</div>
+
+<!-- DATOS EMPRESA -->
+<div class="card" id="datosEmpresaCard">
+  <span class="seccion-tag">Datos de la empresa · Paso 1</span>
+  <h2 class="card-title">Información General de la Empresa</h2>
+  <div class="form-grid">
+    <div class="form-group" style="grid-column:1/-1">
+      <label for="e_nombre">Nombre de la empresa<span class="req">*</span></label>
+      <input type="text" id="e_nombre" placeholder="Razón social o nombre comercial">
+      <span class="field-err" id="err_e_nombre"></span>
+    </div>
+    <div class="form-group">
+      <label for="e_nit">NIT<span class="req">*</span></label>
+      <input type="text" id="e_nit" placeholder="Ej: 900123456-7">
+      <span class="field-err" id="err_e_nit"></span>
+    </div>
+    <div class="form-group">
+      <label for="e_municipio">Municipio<span class="req">*</span></label>
+      <select id="e_municipio"><option value="">-- Seleccione --</option></select>
+      <span class="field-err" id="err_e_municipio"></span>
+    </div>
+    <div class="form-group">
+      <label for="e_dpto">Departamento<span class="req">*</span></label>
+      <select id="e_dpto"><option value="">-- Seleccione --</option></select>
+      <span class="field-err" id="err_e_dpto"></span>
+    </div>
+    <div class="form-group" style="grid-column:1/-1">
+      <label for="e_direccion">Dirección<span class="req">*</span></label>
+      <input type="text" id="e_direccion" placeholder="Calle, carrera, barrio">
+      <span class="field-err" id="err_e_direccion"></span>
+    </div>
+    <div class="form-group" style="grid-column:1/-1"><hr style="border:none;border-top:1px solid #eee;margin:4px 0;"></div>
+    <div class="form-group" style="grid-column:1/-1">
+      <label for="p_nombre">Nombre de quien responde<span class="req">*</span></label>
+      <input type="text" id="p_nombre" placeholder="Nombres y apellidos completos">
+      <span class="field-err" id="err_p_nombre"></span>
+    </div>
+    <div class="form-group">
+      <label for="p_tipo_doc">Tipo de documento<span class="req">*</span></label>
+      <select id="p_tipo_doc"><option value="">-- Seleccione --</option><option>Cédula de ciudadanía</option><option>Cédula de extranjería</option><option>Pasaporte</option></select>
+      <span class="field-err" id="err_p_tipo_doc"></span>
+    </div>
+    <div class="form-group">
+      <label for="p_num_doc">Número de documento<span class="req">*</span></label>
+      <input type="text" id="p_num_doc" placeholder="Solo números" inputmode="numeric">
+      <span class="field-err" id="err_p_num_doc"></span>
+    </div>
+    <div class="form-group">
+      <label for="p_cargo">Cargo<span class="req">*</span></label>
+      <input type="text" id="p_cargo" placeholder="Cargo que desempeña">
+      <span class="field-err" id="err_p_cargo"></span>
+    </div>
+    <div class="form-group">
+      <label for="p_tiempo">Tiempo trabajando en la empresa<span class="req">*</span></label>
+      <select id="p_tiempo"><option value="">-- Seleccione --</option><option>Menos de 1 año</option><option>Entre 1 y 3 años</option><option>Entre 3 y 5 años</option><option>Más de 5 años</option></select>
+      <span class="field-err" id="err_p_tiempo"></span>
+    </div>
+  </div>
+  <div style="margin-top:16px;text-align:right">
+    <button class="btn btn-next" onclick="iniciarDiagnostico()">Iniciar diagnóstico →</button>
+    <div style="color:var(--rojo);font-size:12px;margin-top:6px;min-height:16px" id="errDatos"></div>
+  </div>
+</div>
+
+<!-- PROGRESO -->
+<div id="progressWrap" style="display:none">
+  <p class="prog-txt" id="progressText">Bloque 1 de 8</p>
+  <div class="prog-wrap"><div class="prog-bar" id="progressBar" style="width:0%"></div></div>
+</div>
+
+<div id="formDiag"></div>
+
+<div class="nav-btns" id="navBtns" style="display:none">
+  <button class="btn btn-prev" id="btnPrev" onclick="navBloque(-1)">← Anterior</button>
+  <button class="btn btn-next" id="btnNext" onclick="navBloque(1)">Siguiente →</button>
+</div>
+
+<div class="gracias" id="graciasMsg">
+  <div class="ico">✅</div>
+  <h2>¡Diagnóstico completado!</h2>
+  <p style="color:rgba(255,255,255,0.9);font-size:14px;line-height:1.7">Los datos del diagnóstico fueron registrados correctamente.<br>El administrador podrá descargar el informe PDF y el Excel desde el panel de administración.</p>
+  <p style="margin-top:12px;font-size:12px;color:rgba(255,255,255,0.7)">Puede cerrar esta ventana.</p>
+</div>
+</div>
+
+<script>
+const SUPABASE_URL = "https://wdyrgfejskyzyhrqifnr.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_j9HHnD1cYMaply1o6lS6sg_M0ckf0gh";
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Leer empresa desde URL si viene del admin
+const urlParams = new URLSearchParams(window.location.search);
+const empresaDesdeURL = urlParams.get("empresa") || "";
+if (empresaDesdeURL) {
+  document.getElementById("e_nombre").value = empresaDesdeURL;
+  document.getElementById("e_nombre").readOnly = true;
+  document.getElementById("e_nombre").style.background = "#f0f7f4";
+}
+const MUNICIPIOS=["Abejorral","Abriaquí","Alejandría","Amagá","Amalfi","Andes","Angelópolis","Angostura","Anorí","Anza","Apartadó","Arauca","Arboletes","Argelia","Armenia","Barbosa","Barranquilla","Bello","Betania","Betulia","Bogotá D.C.","Briceño","Bucaramanga","Buriticá","Caicedo","Caldas","Cali","Campamento","Caracolí","Caramanta","Carepa","Carmen de Viboral","Carolina","Cartagena","Caucasia","Cañasgordas","Chigorodó","Cisneros","Ciudad Bolívar","Cocorná","Concepción","Concordia","Copacabana","Cáceres","Cúcuta","Dabeiba","Don Matías","Ebéjico","El Bagre","El Santuario","Entrerríos","Envigado","Florencia","Fredonia","Frontino","Giraldo","Girardota","Granada","Guadalupe","Guarne","Guatapé","Gómez Plata","Heliconia","Hispania","Ibagué","Itagüí","Ituango","Jardín","Jericó","La Ceja","La Estrella","La Pintada","La Unión","Leticia","Liborina","Maceo","Manizales","Marinilla","Medellín","Mocoa","Montebello","Montería","Murindó","Mutatá","Nariño","Nechí","Necoclí","Neiva","Olaya","Pasto","Peque","Pereira","Peñol","Popayán","Pueblorrico","Puerto Berrío","Puerto Carreño","Puerto Inírida","Puerto Nare","Puerto Triunfo","Quibdó","Remedios","Retiro","Riohacha","Rionegro","Sabaneta","Salgar","San Andrés de Cuerquia","San Carlos","San Francisco","San Jerónimo","San José de la Montaña","San José del Guaviare","San Juan de Urabá","San Luis","San Pedro","San Pedro de Urabá","San Rafael","San Roque","San Vicente","Santa Bárbara","Santa Fe de Antioquia","Santa Marta","Santa Rosa de Osos","Santo Domingo","Segovia","Sincelejo","Sonsón","Sopetrán","Tarazá","Tarso","Titiribí","Toledo","Tunja","Turbo","Támesis","Uramita","Urrao","Valdivia","Valledupar","Valparaíso","Vegachí","Venecia","Vigía del Fuerte","Villavicencio","Yalí","Yarumal","Yolombó","Yondó","Yopal","Zaragoza"];
+const DPTOS=["Antioquia","Atlántico","Bogotá D.C.","Bolívar","Boyacá","Caldas","Caquetá","Cauca","Cesar","Chocó","Córdoba","Cundinamarca","Huila","La Guajira","Magdalena","Meta","Nariño","Norte de Santander","Putumayo","Quindío","Risaralda","San Andrés y Providencia","Santander","Sucre","Tolima","Valle del Cauca","Arauca","Casanare","Vichada","Amazonas","Guainía","Guaviare","Vaupés"];
+
+// Llenar selects de municipio y depto
+const selMun=document.getElementById('e_municipio');
+const selDpt=document.getElementById('e_dpto');
+MUNICIPIOS.forEach(m=>{const o=document.createElement('option');o.value=m;o.textContent=m;selMun.appendChild(o);});
+DPTOS.forEach(d=>{const o=document.createElement('option');o.value=d;o.textContent=d;selDpt.appendChild(o);});
+
+// ─── BLOQUES DEL DIAGNÓSTICO ───────────────────────────────────────
+const BLOQUES = [
+  {
+    id:"sst", titulo:"Seguridad y Salud en el Trabajo (SG-SST)", tag:"Bloque 1 de 8",
+    preguntas:[
+      {id:"sst_1",p:"¿Su empresa tiene implementado un Sistema de Gestión de SST (SG-SST)?",ops:[{v:0,l:"No tenemos nada",d:"Sin implementación"},{v:1,l:"En proceso",d:"Iniciando la implementación"},{v:2,l:"Implementado básico",d:"Estándares mínimos cumplidos"},{v:3,l:"Implementado y auditado",d:"Con auditorías y mejora continua"}]},
+      {id:"sst_2",p:"¿Tienen identificados los riesgos y peligros del trabajo?",ops:[{v:0,l:"No",d:""},{v:1,l:"Parcialmente",d:""},{v:2,l:"Sí, completamente",d:""}]},
+      {id:"sst_3",p:"¿Realizan capacitaciones en seguridad y salud a sus empleados?",ops:[{v:0,l:"Nunca",d:""},{v:1,l:"Ocasionalmente",d:""},{v:2,l:"Regularmente (plan anual)",d:""}]},
+      {id:"sst_4",p:"¿Han tenido accidentes de trabajo en el último año?",ops:[{v:0,l:"Sí, varios",d:""},{v:1,l:"Sí, alguno",d:""},{v:2,l:"Ninguno",d:""}]},
+      {id:"sst_5",p:"¿Conocen la Resolución 0312 de 2019 (estándares mínimos SG-SST)?",ops:[{v:0,l:"No la conocemos",d:""},{v:1,l:"La conocemos pero no la aplicamos",d:""},{v:2,l:"La conocemos y aplicamos",d:""}]},
+    ]
+  },
+  {
+    id:"psico", titulo:"Medición de Riesgos Psicosociales", tag:"Bloque 2 de 8",
+    preguntas:[
+      {id:"psico_1",p:"¿Han aplicado la Batería de Riesgo Psicosocial del Ministerio de Trabajo?",ops:[{v:0,l:"Nunca",d:""},{v:1,l:"Una vez (hace más de 1 año)",d:""},{v:2,l:"Periódicamente",d:""},{v:3,l:"Tenemos resultados y plan de acción",d:""}]},
+      {id:"psico_1b",p:"Si han aplicado la Batería Psicosocial — ¿la aplicaron en el año en curso (este año)?",ops:[{v:0,l:"No aplica / Nunca la hemos aplicado",d:""},{v:1,l:"No, fue hace más de un año",d:""},{v:2,l:"Sí, este año",d:""}]},
+      {id:"psico_2",p:"¿Conocen la Resolución 2646 de 2008 y 2404 de 2019 sobre riesgo psicosocial?",ops:[{v:0,l:"No las conocemos",d:""},{v:1,l:"Las conocemos pero no las aplicamos",d:""},{v:2,l:"Las conocemos y aplicamos",d:""}]},
+      {id:"psico_3",p:"¿Han identificado situaciones de estrés laboral en la empresa?",ops:[{v:0,l:"No",d:""},{v:1,l:"Sospechamos que sí",d:""},{v:2,l:"Sí, pero sin intervención",d:""},{v:3,l:"Sí y tenemos programa de intervención",d:""}]},
+      {id:"psico_4",p:"¿Existe Comité de Convivencia Laboral activo y funcionando?",ops:[{v:0,l:"No existe",d:""},{v:1,l:"Existe pero no se reúne",d:""},{v:2,l:"Funciona correctamente",d:""}]},
+      {id:"psico_5",p:"¿Sus líderes han recibido formación en manejo de equipos y liderazgo saludable?",ops:[{v:0,l:"No",d:""},{v:1,l:"Formación básica",d:""},{v:2,l:"Formación completa y periódica",d:""}]},
+    ]
+  },
+  {
+    id:"admin", titulo:"Gestión Administrativa y Contable", tag:"Bloque 3 de 8",
+    preguntas:[
+      {id:"admin_1",p:"¿Llevan contabilidad formal en su empresa?",ops:[{v:0,l:"No llevamos",d:""},{v:1,l:"Lo hace el dueño/a",d:""},{v:2,l:"Contador ocasional",d:""},{v:3,l:"Contador fijo o firma contable",d:""}]},
+      {id:"admin_2",p:"¿Tienen al día sus obligaciones tributarias (declaraciones, RUT, industria y comercio)?",ops:[{v:0,l:"No",d:""},{v:1,l:"Parcialmente",d:""},{v:2,l:"Completamente al día",d:""}]},
+      {id:"admin_3",p:"¿Conocen sus costos reales de operación y margen de ganancia?",ops:[{v:0,l:"No",d:""},{v:1,l:"Aproximadamente",d:""},{v:2,l:"Sí, con indicadores claros",d:""}]},
+      {id:"admin_4",p:"¿Tienen alguien que maneje nómina y contratos laborales?",ops:[{v:0,l:"No",d:""},{v:1,l:"Lo hace el dueño/a",d:""},{v:2,l:"Persona dedicada o proveedor externo",d:""}]},
+    ]
+  },
+  {
+    id:"gerencia", titulo:"Gestión Gerencial", tag:"Bloque 4 de 8",
+    preguntas:[
+      {id:"ger_1",p:"¿Tienen definida una misión, visión y plan de negocio?",ops:[{v:0,l:"No",d:""},{v:1,l:"Informalmente",d:""},{v:2,l:"Documentado pero no actualizado",d:""},{v:3,l:"Documentado, comunicado y actualizado",d:""}]},
+      {id:"ger_2",p:"¿Toman decisiones basadas en indicadores o datos de la empresa?",ops:[{v:0,l:"No",d:""},{v:1,l:"Ocasionalmente",d:""},{v:2,l:"Regularmente con tablero de control",d:""}]},
+      {id:"ger_3",p:"¿Han recibido alguna vez asesoría o consultoría empresarial?",ops:[{v:0,l:"No",d:""},{v:1,l:"Sí, de manera ocasional",d:""},{v:2,l:"Sí, de forma continua",d:""}]},
+    ]
+  },
+  {
+    id:"legal", titulo:"Legal, Jurídico y Reforma Laboral", tag:"Bloque 5 de 8",
+    preguntas:[
+      {id:"leg_1",p:"¿Sus contratos con empleados y proveedores están por escrito y revisados?",ops:[{v:0,l:"No",d:""},{v:1,l:"Algunos sí",d:""},{v:2,l:"Todos revisados y actualizados",d:""}]},
+      {id:"leg_2",p:"¿Conocen los cambios de la Reforma Laboral vigente (reducción de jornada, recargos nocturnos, etc.)?",ops:[{v:0,l:"No la conocemos",d:""},{v:1,l:"Tenemos conocimiento básico",d:""},{v:2,l:"La conocemos y hemos adaptado la empresa",d:""}]},
+      {id:"leg_3",p:"¿Aplican correctamente la Ley 1010 (acoso laboral) y Ley 1257 (violencia de género)?",ops:[{v:0,l:"No las conocemos",d:""},{v:1,l:"Las conocemos parcialmente",d:""},{v:2,l:"Las aplicamos correctamente",d:""}]},
+      {id:"leg_4",p:"¿Conocen la Ley 2191 de 2022 (derecho a la desconexión digital)?",ops:[{v:0,l:"No",d:""},{v:1,l:"La conocemos pero no la hemos implementado",d:""},{v:2,l:"La implementamos",d:""}]},
+      {id:"leg_5",p:"¿Han tenido conflictos laborales, demandas o sanciones en el último año?",ops:[{v:0,l:"Sí, varios",d:""},{v:1,l:"Alguno",d:""},{v:2,l:"Ninguno",d:""}]},
+    ]
+  },
+  {
+    id:"clima", titulo:"Clima Organizacional y Bienestar", tag:"Bloque 6 de 8",
+    preguntas:[
+      {id:"cli_1",p:"¿Han realizado alguna vez una medición de clima organizacional?",ops:[{v:0,l:"Nunca",d:""},{v:1,l:"Una vez (hace más de 1 año)",d:""},{v:2,l:"Sí, anualmente",d:""},{v:3,l:"Semestral o más frecuente",d:""}]},
+      {id:"cli_1b",p:"Si han realizado medición de clima — ¿la realizaron en el año en curso (este año)?",ops:[{v:0,l:"No aplica / No hemos hecho",d:""},{v:1,l:"No, fue hace más de un año",d:""},{v:2,l:"Sí, este año",d:""}]},
+      {id:"cli_2",p:"¿Tienen un Plan de Bienestar Anual para sus empleados?",ops:[{v:0,l:"No existe",d:""},{v:1,l:"Actividades esporádicas",d:""},{v:2,l:"Plan estructurado",d:""},{v:3,l:"Plan con presupuesto y seguimiento",d:""}]},
+      {id:"cli_3",p:"¿Miden el nivel de satisfacción y compromiso de sus empleados?",ops:[{v:0,l:"No",d:""},{v:1,l:"Informalmente",d:""},{v:2,l:"Con encuestas formales",d:""}]},
+    ]
+  },
+  {
+    id:"capacitacion", titulo:"Capacitación y Plan Carrera", tag:"Bloque 7 de 8",
+    preguntas:[
+      {id:"cap_1",p:"¿Tienen un Plan de Capacitaciones anual?",ops:[{v:0,l:"No existe",d:""},{v:1,l:"Capacitaciones ocasionales",d:""},{v:2,l:"Plan estructurado",d:""},{v:3,l:"Plan con presupuesto y evaluación de impacto",d:""}]},
+      {id:"cap_2",p:"¿Las capacitaciones están alineadas con las necesidades del negocio y los cargos?",ops:[{v:0,l:"No",d:""},{v:1,l:"Parcialmente",d:""},{v:2,l:"Completamente alineadas",d:""}]},
+      {id:"cap_3",p:"¿Existe un Plan Carrera o ruta de crecimiento para sus empleados?",ops:[{v:0,l:"No existe",d:""},{v:1,l:"Informal y sin documentar",d:""},{v:2,l:"Documentado",d:""},{v:3,l:"Documentado y con seguimiento periódico",d:""}]},
+      {id:"cap_4",p:"¿Conocen la oferta de formación de Comfenalco Antioquia, sin costo para empresas afiliadas?",ops:[{v:0,l:"No la conocemos",d:""},{v:1,l:"La conocemos pero no la hemos aprovechado",d:""},{v:2,l:"Sí y la aprovechamos actualmente",d:"Sin costo para afiliados"}]},
+    ]
+  },
+  {
+    id:"talento", titulo:"Talento Humano y Selección", tag:"Bloque 8 de 8",
+    preguntas:[
+      {id:"tal_1",p:"¿Tienen un proceso definido para seleccionar y contratar personal?",ops:[{v:0,l:"No",d:""},{v:1,l:"Informal",d:""},{v:2,l:"Proceso estructurado",d:""}]},
+      {id:"tal_2",p:"¿Evalúan el desempeño de sus empleados periódicamente?",ops:[{v:0,l:"No",d:""},{v:1,l:"Informalmente",d:""},{v:2,l:"Con evaluaciones formales",d:""}]},
+      {id:"tal_3",p:"¿Tienen definidos perfiles de cargo por competencias?",ops:[{v:0,l:"No",d:""},{v:1,l:"Algunos cargos",d:""},{v:2,l:"Todos los cargos documentados",d:""}]},
+      {id:"tal_4",p:"¿Realizan procesos de inducción y reinducción al personal nuevo?",ops:[{v:0,l:"No",d:""},{v:1,l:"Informalmente",d:""},{v:2,l:"Proceso formal y documentado",d:""}]},
+    ]
+  }
+];
+
+// RECOMENDACIONES por bloque y nivel
+const RECOMENDACIONES = {
+  sst:{
+    basico:{texto:"PRIORITARIO: Su empresa no cuenta con SG-SST implementado, incumpliendo la Resolución 0312/2019. Existe riesgo de sanciones y accidentes laborales.",
+      servicios:["Asesoría para implementación SG-SST desde cero","Acompañamiento en Resolución 0312 de 2019","Capacitación en identificación de peligros y riesgos","Formación de COPASST y Comité de Convivencia"]},
+    medio:{texto:"Su empresa está en proceso de implementación del SG-SST. Requiere refuerzo en algunos componentes clave para cumplir la normatividad.",
+      servicios:["Auditoría y diagnóstico del SG-SST actual","Capacitaciones en prevención de riesgos laborales","Formación en investigación de accidentes de trabajo","Asesoría en estándares mínimos Res. 0312/2019"]},
+    alto:{texto:"Su empresa tiene un buen nivel de gestión en SST. Se recomienda mantenimiento y mejora continua del sistema.",
+      servicios:["Auditorías periódicas del SG-SST","Formación avanzada en seguridad industrial","Actualización normativa continua"]}
+  },
+  psico:{
+    basico:{texto:"PRIORITARIO: Su empresa no cuenta con gestión de riesgos psicosociales. Esto puede afectar la salud mental de los trabajadores y generar sanciones.",
+      servicios:["Aplicación de Batería de Riesgo Psicosocial (Min. Trabajo)","Asesoría para conformar Comité de Convivencia Laboral","Talleres de manejo del estrés y salud mental","Programa de liderazgo saludable para jefes"]},
+    medio:{texto:"Su empresa tiene conciencia sobre los riesgos psicosociales pero requiere fortalecer la intervención y seguimiento.",
+      servicios:["Interpretación y plan de acción Batería Psicosocial","Capacitación Ley 1010 – Acoso laboral","Talleres de inteligencia emocional y comunicación asertiva","Asesoría en protocolos de atención a situaciones críticas"]},
+    alto:{texto:"Su empresa gestiona adecuadamente los riesgos psicosociales. Se recomienda mantener y actualizar las intervenciones.",
+      servicios:["Reevaluación periódica de riesgos psicosociales","Formación continua en bienestar emocional","Actualización de protocolos de convivencia"]}
+  },
+  admin:{
+    basico:{texto:"Su empresa presenta debilidades importantes en gestión contable y administrativa que pueden afectar su sostenibilidad y cumplimiento legal.",
+      servicios:["Asesoría contable y tributaria para PYMES","Formación en gestión financiera básica","Acompañamiento en formalización empresarial","Orientación en obligaciones como empleador"]},
+    medio:{texto:"Su empresa tiene gestión contable pero puede mejorar en indicadores financieros y control de costos.",
+      servicios:["Consultoría en control de costos y rentabilidad","Formación en herramientas de gestión financiera","Asesoría en optimización de nómina y beneficios"]},
+    alto:{texto:"Su empresa tiene buenas prácticas de gestión administrativa. Se recomienda continuar fortaleciendo los sistemas de control.",
+      servicios:["Consultoría en sistemas de información gerencial","Formación en presupuestación y proyecciones financieras"]}
+  },
+  gerencia:{
+    basico:{texto:"Su empresa carece de planeación estratégica formal. Esto limita el crecimiento y la toma de decisiones efectivas.",
+      servicios:["Consultoría en planeación estratégica para PYMES","Formación gerencial y habilidades directivas","Acompañamiento en diseño de plan de negocio","Diagnóstico organizacional integral"]},
+    medio:{texto:"Su empresa tiene algunos elementos de planeación pero puede fortalecer la gestión basada en datos e indicadores.",
+      servicios:["Asesoría en diseño de tablero de control (KPIs)","Formación en toma de decisiones basada en datos","Consultoría en gestión por procesos"]},
+    alto:{texto:"Su empresa tiene buenas prácticas gerenciales. Se recomienda mantener la mejora continua.",
+      servicios:["Formación avanzada en liderazgo transformacional","Consultoría en innovación y transformación digital"]}
+  },
+  legal:{
+    basico:{texto:"PRIORITARIO: Su empresa presenta riesgos legales importantes por desconocimiento de la normatividad laboral vigente.",
+      servicios:["Asesoría jurídica laboral para PYMES","Taller sobre Reforma Laboral vigente","Formación en contratación laboral y contratos","Orientación en Ley 1010 y Ley 1257"]},
+    medio:{texto:"Su empresa conoce parte de la normatividad pero requiere actualización y acompañamiento para su correcta aplicación.",
+      servicios:["Actualización en Reforma Laboral y cambios normativos","Asesoría en revisión y actualización de contratos","Formación en desconexión digital (Ley 2191/2022)"]},
+    alto:{texto:"Su empresa tiene un buen manejo legal. Se recomienda mantenerse actualizado ante los cambios normativos.",
+      servicios:["Suscripción a alertas de cambios normativos","Capacitación continua al equipo de RRHH"]}
+  },
+  clima:{
+    basico:{texto:"Su empresa no cuenta con medición de clima organizacional ni planes de bienestar. Esto puede afectar la retención de talento y productividad.",
+      servicios:["Medición de Clima Organizacional con informe ejecutivo","Diseño de Plan de Bienestar Laboral anual","Talleres de motivación y sentido de pertenencia","Programa de reconocimiento y beneficios no monetarios"]},
+    medio:{texto:"Su empresa tiene algunas iniciativas de bienestar pero puede sistematizarlas y medir su impacto.",
+      servicios:["Diagnóstico de clima organizacional con benchmarking","Asesoría en diseño de programas de bienestar con presupuesto","Formación en gestión del cambio organizacional"]},
+    alto:{texto:"Su empresa tiene buenas prácticas de clima y bienestar. Se recomienda mantener la medición periódica.",
+      servicios:["Medición semestral de clima organizacional","Benchmarking sectorial de bienestar laboral"]}
+  },
+  capacitacion:{
+    basico:{texto:"Su empresa no cuenta con un plan de capacitación estructurado ni rutas de crecimiento para sus empleados.",
+      servicios:["Diseño de Plan de Capacitaciones anual basado en necesidades","Portafolio de formación Comfenalco Antioquia","Ruta de Empleabilidad y desarrollo de competencias","Asesoría en Plan Carrera por competencias"]},
+    medio:{texto:"Su empresa realiza algunas capacitaciones pero puede mejorar la planeación y medición de impacto.",
+      servicios:["Diagnóstico de necesidades de formación (DNF)","Diseño de rutas de aprendizaje por cargo","Evaluación de impacto de capacitaciones"]},
+    alto:{texto:"Su empresa tiene un plan de capacitación bien estructurado. Se recomienda innovar en metodologías.",
+      servicios:["Formación en modalidades e-learning y blended learning","Certificación de competencias laborales SENA-MEN"]}
+  },
+  talento:{
+    basico:{texto:"Su empresa no cuenta con procesos formales de selección y gestión del talento humano.",
+      servicios:["Servicio de Selección de Personal – Agencia de Empleo","Diseño de perfiles de cargo por competencias","Implementación de proceso de inducción y reinducción","Asesoría en evaluación de desempeño"]},
+    medio:{texto:"Su empresa tiene algunos procesos de talento humano pero puede fortalecerlos con herramientas y metodologías.",
+      servicios:["Asesoría en sistema de evaluación de desempeño","Formación en entrevistas por competencias","Consultoría en gestión del clima y compromiso"]},
+    alto:{texto:"Su empresa tiene buenas prácticas de gestión del talento. Se recomienda optimizar y medir el retorno de la inversión.",
+      servicios:["Consultoría en employer branding","Active Placement – Retención de talento clave"]}
+  }
+};
+
+// Estado
+let bloqueActual = 0;
+let respuestas = {};
+let datosEmpresa = {};
+
+// ─── INICIAR DIAGNÓSTICO ───────────────────────────────────────────
+function iniciarDiagnostico() {
+  const campos = [
+    {id:'e_nombre',label:'Nombre de la empresa'},
+    {id:'e_nit',label:'NIT'},
+    {id:'e_municipio',label:'Municipio'},
+    {id:'e_dpto',label:'Departamento'},
+    {id:'e_direccion',label:'Dirección'},
+    {id:'p_nombre',label:'Nombre de quien responde'},
+    {id:'p_tipo_doc',label:'Tipo de documento'},
+    {id:'p_num_doc',label:'Número de documento'},
+    {id:'p_cargo',label:'Cargo'},
+    {id:'p_tiempo',label:'Tiempo trabajando en la empresa'},
+  ];
+  let ok = true;
+  campos.forEach(c=>{
+    const el = document.getElementById(c.id);
+    const err = document.getElementById('err_'+c.id);
+    el.classList.remove('input-invalid');
+    if(err){err.style.display='none';err.textContent='';}
+    if(!el.value.trim()){
+      el.classList.add('input-invalid');
+      if(err){err.textContent='Campo obligatorio.';err.style.display='block';}
+      ok=false;
+    }
+  });
+  if(!ok){document.getElementById('errDatos').textContent='⚠ Complete todos los campos obligatorios.';return;}
+  document.getElementById('errDatos').textContent='';
+  datosEmpresa={
+    nombre:document.getElementById('e_nombre').value.trim(),
+    nit:document.getElementById('e_nit').value.trim(),
+    municipio:document.getElementById('e_municipio').value,
+    dpto:document.getElementById('e_dpto').value,
+    direccion:document.getElementById('e_direccion').value.trim(),
+    persona:document.getElementById('p_nombre').value.trim(),
+    tipo_doc:document.getElementById('p_tipo_doc').value,
+    num_doc:document.getElementById('p_num_doc').value.trim(),
+    cargo:document.getElementById('p_cargo').value.trim(),
+    tiempo:document.getElementById('p_tiempo').value,
+    fecha:new Date().toLocaleDateString('es-CO')
+  };
+  document.getElementById('datosEmpresaCard').style.display='none';
+  document.getElementById('progressWrap').style.display='block';
+  document.getElementById('navBtns').style.display='flex';
+  renderBloques();
+  mostrarBloque(0);
+}
+
+// ─── RENDERIZAR BLOQUES ─────────────────────────────────────────────
+function renderBloques(){
+  const fa = document.getElementById('formDiag');
+  fa.innerHTML='';
+  BLOQUES.forEach((bloque,bi)=>{
+    const div=document.createElement('div');
+    div.className='seccion-form card';
+    div.id='bloque_'+bi;
+    let html=`<span class="seccion-tag">${bloque.tag}</span><h2 class="card-title">${bloque.titulo}</h2>`;
+    html+=`<div class="err-bloque" id="err_bloque_${bi}">⚠ Por favor responda todas las preguntas antes de continuar.</div>`;
+    bloque.preguntas.forEach((preg,pi)=>{
+      html+=`<div class="pregunta-diag" id="preg_${bi}_${pi}">`;
+      html+=`<p><span style="color:var(--verde);font-weight:700;">${pi+1}. </span>${preg.p}</p>`;
+      html+=`<div class="opciones-diag">`;
+      preg.ops.forEach((op,oi)=>{
+        html+=`<div class="opcion-btn" id="op_${bi}_${pi}_${oi}" onclick="selOp(${bi},${pi},${oi},${op.v})">
+          <div class="opcion-radio"></div>
+          <div><div class="opcion-label">${op.l}</div>${op.d?`<div class="opcion-desc">${op.d}</div>`:''}</div>
+        </div>`;
+      });
+      html+=`</div></div>`;
+    });
+    div.innerHTML=html;
+    fa.appendChild(div);
+  });
+}
+
+function selOp(bi,pi,oi,valor){
+  const bloque=BLOQUES[bi];
+  const preg=bloque.preguntas[pi];
+  // Guardar respuesta
+  if(!respuestas[bloque.id]) respuestas[bloque.id]={};
+  respuestas[bloque.id][preg.id]=valor;
+  // Visual
+  const total=preg.ops.length;
+  for(let i=0;i<total;i++){
+    const btn=document.getElementById(`op_${bi}_${pi}_${i}`);
+    if(btn) btn.classList.remove('selected');
+  }
+  const sel=document.getElementById(`op_${bi}_${pi}_${oi}`);
+  if(sel) sel.classList.add('selected');
+  // Quitar error visual de pregunta
+  const pregEl=document.getElementById(`preg_${bi}_${pi}`);
+  if(pregEl) pregEl.classList.remove('sin-responder');
+}
+
+function mostrarBloque(idx){
+  document.querySelectorAll('.seccion-form').forEach(s=>s.style.display='none');
+  document.getElementById('bloque_'+idx).style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+  const pct=Math.round(((idx+1)/BLOQUES.length)*100);
+  document.getElementById('progressBar').style.width=pct+'%';
+  document.getElementById('progressText').textContent=`Bloque ${idx+1} de ${BLOQUES.length}`;
+  document.getElementById('btnPrev').style.display=idx===0?'none':'block';
+  const isLast=idx===BLOQUES.length-1;
+  const btn=document.getElementById('btnNext');
+  if(isLast){btn.textContent='Finalizar ✓';btn.className='btn btn-submit';btn.onclick=finalizarDiagnostico;}
+  else{btn.textContent='Siguiente →';btn.className='btn btn-next';btn.onclick=()=>navBloque(1);}
+}
+
+function navBloque(dir){
+  if(dir===1){
+    // Validar bloque actual
+    const bloque=BLOQUES[bloqueActual];
+    const faltantes=[];
+    bloque.preguntas.forEach((preg,pi)=>{
+      const val=respuestas[bloque.id]?.[preg.id];
+      if(val===undefined||val===null){
+        faltantes.push(pi);
+        document.getElementById(`preg_${bloqueActual}_${pi}`)?.classList.add('sin-responder');
+      } else {
+        document.getElementById(`preg_${bloqueActual}_${pi}`)?.classList.remove('sin-responder');
+      }
+    });
+    const errEl=document.getElementById(`err_bloque_${bloqueActual}`);
+    if(faltantes.length>0){
+      if(errEl){errEl.style.display='block';errEl.textContent=`⚠ Faltan ${faltantes.length} pregunta(s) por responder (marcadas en rojo).`;}
+      window.scrollTo({top:document.getElementById('bloque_'+bloqueActual).offsetTop-20,behavior:'smooth'});
+      return;
+    }
+    if(errEl) errEl.style.display='none';
+  }
+  bloqueActual+=dir;
+  mostrarBloque(bloqueActual);
+}
+
+async function finalizarDiagnostico(){
+  // Validar último bloque
+  const bloque=BLOQUES[bloqueActual];
+  const faltantes=[];
+  bloque.preguntas.forEach((preg,pi)=>{
+    const val=respuestas[bloque.id]?.[preg.id];
+    if(val===undefined||val===null){
+      faltantes.push(pi);
+      document.getElementById(`preg_${bloqueActual}_${pi}`)?.classList.add('sin-responder');
+    }
+  });
+  if(faltantes.length>0){
+    const errEl=document.getElementById(`err_bloque_${bloqueActual}`);
+    if(errEl){errEl.style.display='block';errEl.textContent=`⚠ Faltan ${faltantes.length} pregunta(s) por responder.`;}
+    window.scrollTo({top:document.getElementById('bloque_'+bloqueActual).offsetTop-20,behavior:'smooth'});
+    return;
+  }
+
+  // Armar payload para Supabase
+  const payload = {
+    nombre_empresa: datosEmpresa.nombre,
+    nit: datosEmpresa.nit,
+    municipio: datosEmpresa.municipio,
+    dpto: datosEmpresa.dpto,
+    direccion: datosEmpresa.direccion,
+    persona: datosEmpresa.persona,
+    tipo_doc: datosEmpresa.tipo_doc,
+    num_doc: datosEmpresa.num_doc,
+    cargo: datosEmpresa.cargo,
+    tiempo: datosEmpresa.tiempo,
+    fecha: new Date().toISOString(),
+  };
+  // Aplanar todas las respuestas
+  BLOQUES.forEach(b=>{
+    b.preguntas.forEach(preg=>{
+      payload[preg.id] = respuestas[b.id]?.[preg.id] ?? null;
+    });
+  });
+
+  try {
+    const { error } = await supabaseClient.from("diagnosticos_empresariales").insert([payload]);
+    if (error) throw error;
+  } catch(e) {
+    // Si falla Supabase, igual mostramos pantalla de gracias (guardar local no es crítico)
+    console.warn("Error guardando en Supabase:", e.message);
+  }
+
+  // Mostrar pantalla de gracias
+  document.querySelectorAll('.seccion-form').forEach(s=>s.style.display='none');
+  document.getElementById('navBtns').style.display='none';
+  document.getElementById('progressWrap').style.display='none';
+  document.getElementById('graciasMsg').style.display='block';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ─── CALCULAR NIVEL POR BLOQUE ─────────────────────────────────────
+function calcularNivel(bloqueId){
+  const bloque=BLOQUES.find(b=>b.id===bloqueId);
+  if(!bloque) return 'basico';
+  const pregs=bloque.preguntas;
+  let total=0, maxTotal=0;
+  pregs.forEach(preg=>{
+    const maxVal=Math.max(...preg.ops.map(o=>o.v));
+    maxTotal+=maxVal;
+    const val=respuestas[bloqueId]?.[preg.id]||0;
+    total+=val;
+  });
+  const pct=maxTotal>0?total/maxTotal:0;
+  if(pct>=0.7) return 'alto';
+  if(pct>=0.4) return 'medio';
+  return 'basico';
+}
+
+function nivelLabel(n){
+  if(n==='alto') return 'Alto';
+  if(n==='medio') return 'Medio';
+  return 'Básico';
+}
+function nivelColor(n){
+  if(n==='alto') return [46,125,50];
+  if(n==='medio') return [245,127,23];
+  return [198,40,40];
+}
+
+</script>
+</body>
+</html>

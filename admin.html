@@ -371,14 +371,18 @@ function copiarLinkDiag() {
 
 // ── LOGIN ──────────────────────────────────────────────────
 function login() {
-  const u = document.getElementById("adminUser").value;
-  const p = document.getElementById("adminPass").value;
+  const u = (document.getElementById("adminUser").value || "").trim();
+  const p = (document.getElementById("adminPass").value || "").trim();
+  console.log("Intentando login con usuario:", u);
   if (u === ADMIN_USER && p === ADMIN_PASS) {
     document.getElementById("loginWrap").style.display = "none";
     document.getElementById("mainWrap").style.display = "block";
     cargarEmpresas();
   } else {
-    document.getElementById("errLogin").style.display = "block";
+    console.log("Login fallido. Esperado:", ADMIN_USER, "/", ADMIN_PASS);
+    const err = document.getElementById("errLogin");
+    err.style.display = "block";
+    err.textContent = "Usuario o contraseña incorrectos";
   }
 }
 function logout() {
@@ -1140,6 +1144,9 @@ function descargarExcel() {
   a.href = url;
   a.download = `DatosSocioDemograficos_${empresaActual.replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ══════════════════════════════════════════════════════════════
 // DIAGNÓSTICOS EMPRESARIALES
 // ══════════════════════════════════════════════════════════════

@@ -1546,33 +1546,66 @@ async function generarPDFDiag() {
 
   // ── Helper: dibujar header en cada página
   function drawHeader(isFirst) {
-    doc.setFillColor(...VERDE); doc.rect(0,0,W,isFirst?38:16,"F");
-    doc.setFillColor(...VERDE_PIST); doc.rect(0,isFirst?36:15,W,1.5,"F");
-    // Logos sobre el header — con fondo blanco perfectamente ajustado al contenido
-    const logoH1 = isFirst ? 20 : 9;
-    const logoH2 = isFirst ? 18 : 9;
-    const logoW1 = isFirst ? 44 : 28;
-    const logoW2 = isFirst ? 36 : 32;
-    const logoY  = isFirst ? 7  : 2.5;
-    const pad = 2;
-    // Fondo blanco recortado exacto alrededor de cada logo
-    doc.setFillColor(255,255,255);
-    if (logo1Src) doc.roundedRect(MARGIN-pad, logoY-pad, logoW1+pad*2, logoH1+pad*2, 2, 2, "F");
-    if (logo2Src) doc.roundedRect(W-MARGIN-logoW2-pad, logoY-pad, logoW2+pad*2, logoH2+pad*2, 2, 2, "F");
+    const hH = isFirst ? 40 : 16; // altura header
+
+    // Degradado blanco → verde simulado con bandas (jsPDF no tiene degradado nativo)
+    const steps = 28;
+    for (let i = 0; i < steps; i++) {
+      const t = i / steps; // 0=blanco, 1=verde
+      const r = Math.round(255 + (VERDE[0]-255)*t);
+      const g = Math.round(255 + (VERDE[1]-255)*t);
+      const b2 = Math.round(255 + (VERDE[2]-255)*t);
+      const bandW = isFirst ? 85 : 60; // zona del degradado (lado izquierdo)
+      const bx = (bandW / steps) * i;
+      const bw = (bandW / steps) + 0.5;
+      doc.setFillColor(r, g, b2);
+      doc.rect(bx, 0, bw, hH, "F");
+    }
+    // Resto del header en verde sólido
+    const bandW = isFirst ? 85 : 60;
+    doc.setFillColor(...VERDE);
+    doc.rect(bandW, 0, W - bandW, hH, "F");
+
+    // Línea pistacho inferior
+    doc.setFillColor(...VERDE_PIST);
+    doc.rect(0, hH - 1.5, W, 1.5, "F");
+
+    // ── LOGOS: ambos a la izquierda, zona blanca del degradado
+    const logoY   = isFirst ? 7   : 3;
+    const logoH1  = isFirst ? 18  : 10;
+    const logoH2  = isFirst ? 14  : 9;
+    const logoW1  = isFirst ? 38  : 24;
+    const logoW2  = isFirst ? 30  : 22;
+    const gap     = isFirst ? 4   : 3;
+    // Logo 1 en posición MARGIN
     try {
-      if (logo1Src) doc.addImage(logo1Src,"JPEG", MARGIN,              logoY, logoW1, logoH1);
-      if (logo2Src) doc.addImage(logo2Src,"PNG",  W-MARGIN-logoW2,     logoY, logoW2, logoH2);
+      if (logo1Src) doc.addImage(logo1Src,"JPEG", MARGIN, logoY, logoW1, logoH1);
     } catch(e){}
+    // Logo 2 justo a continuación
+    try {
+      if (logo2Src) doc.addImage(logo2Src,"PNG", MARGIN + logoW1 + gap, logoY + (isFirst?2:0.5), logoW2, logoH2);
+    } catch(e){}
+
+    // Separador vertical entre logos y texto
+    const sepX = MARGIN + logoW1 + gap + logoW2 + 5;
+    doc.setDrawColor(255,255,255,0.4);
+    doc.setLineWidth(0.4);
+    doc.line(sepX, isFirst?5:3, sepX, hH-4);
+
+    // Texto del header (a la derecha de los logos, ya en zona verde)
     if (isFirst) {
-      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(12);
-      doc.text("DIAGNOSTICO EMPRESARIAL INTEGRAL", W/2, 17, {align:"center"});
-      doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
-      doc.text("Agencia de Empleo y Emprendimiento - Comfenalco Antioquia", W/2, 23.5, {align:"center"});
-      doc.setFontSize(7.5);
-      doc.text(`Generado: ${new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"})}`, W/2, 29.5, {align:"center"});
+      const txtX = sepX + 6;
+      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(11.5);
+      doc.text("DIAGNOSTICO EMPRESARIAL INTEGRAL", txtX, 15);
+      doc.setFont("helvetica","normal"); doc.setFontSize(8);
+      doc.text("Agencia de Empleo y Emprendimiento", txtX, 22);
+      doc.text("Comfenalco Antioquia - Servicio Publico de Empleo", txtX, 28);
+      doc.setFontSize(7);
+      doc.text("Generado: " + new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"}), txtX, 34);
     } else {
+      const txtX = sepX + 5;
       doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
-      doc.text("DIAGNÓSTICO EMPRESARIAL  " + (d.nombre_empresa||empresaActual).toUpperCase(), MARGIN+50, 9);
+      doc.text("DIAGNOSTICO EMPRESARIAL - " + (d.nombre_empresa||empresaActual).toUpperCase().slice(0,35), txtX, 10);
     }
   }
 
@@ -1599,7 +1632,7 @@ async function generarPDFDiag() {
   // PÁGINA 1 — PORTADA + DATOS + RESUMEN
   // ═══════════════════════════════════════════
   drawHeader(true);
-  y = 45;
+  y = 47;
 
   // Datos empresa
   doc.setFillColor(232,244,239); doc.roundedRect(MARGIN,y,CW,46,3,3,"F");
@@ -1639,22 +1672,41 @@ async function generarPDFDiag() {
   });
   y += 29;
 
-  // Gráfica barras general (desde canvas)
+  // Gráfica barras general — proporcional, no aplastada
   if (imgBarras) {
-    y = sectionTitle(" NIVEL (%) POR ÁREA", y);
-    doc.addImage(imgBarras,"PNG",MARGIN,y,CW,55);
-    y += 59;
-  }
-
-  // Gráfica dona + radar en fila
-  if (imgDona || imgRadar) {
-    y = sectionTitle(" DISTRIBUCIÓN DE NIVELES & PERFIL DE MADUREZ", y);
-    if (imgDona)  doc.addImage(imgDona,"PNG",  MARGIN,        y, CW/2-4, 55);
-    if (imgRadar) doc.addImage(imgRadar,"PNG", MARGIN+CW/2+4, y, CW/2-4, 55);
-    y += 59;
+    y = sectionTitle("NIVEL DE MADUREZ POR AREA (%)", y);
+    // Mantener proporción del canvas (aprox 2:1 ancho:alto), máx ancho CW
+    const barW = CW * 0.88;
+    const barH = barW * 0.42; // proporción natural de barras con 8 ítems
+    const barX = MARGIN + (CW - barW) / 2;
+    doc.addImage(imgBarras,"PNG", barX, y, barW, barH);
+    y += barH + 6;
   }
 
   drawFooter(1, "...");
+
+  // ─── PÁGINA 2 de resumen: dona + radar ─────────────────────
+  doc.addPage();
+  drawHeader(false);
+  let y2 = 22;
+
+  if (imgDona || imgRadar) {
+    y2 = sectionTitle("DISTRIBUCION DE NIVELES Y PERFIL DE MADUREZ", y2);
+    const halfW = CW/2 - 6;
+    const chartH = 85;
+    if (imgDona) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
+      doc.text("Distribucion de niveles", MARGIN + halfW/2, y2+4, {align:"center"});
+      doc.addImage(imgDona,"PNG", MARGIN, y2+8, halfW, chartH);
+    }
+    if (imgRadar) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
+      doc.text("Perfil de madurez empresarial", MARGIN + halfW + 10 + halfW/2, y2+4, {align:"center"});
+      doc.addImage(imgRadar,"PNG", MARGIN+halfW+10, y2+8, halfW, chartH);
+    }
+    y2 += chartH + 20;
+  }
+  drawFooter(2, "...");
 
   // ═══════════════════════════════════════════
   // PÁGINAS 2+ — UNA PÁGINA POR ÁREA
@@ -1851,9 +1903,9 @@ async function generarPDFDiag() {
     y+=15;
   });
 
-  // Footer en todas las páginas
+  // Footer en todas las páginas con numeración correcta
   const totalPags = doc.getNumberOfPages();
-  for (let p=1;p<=totalPags;p++) {
+  for (let p = 1; p <= totalPags; p++) {
     doc.setPage(p);
     drawFooter(p, totalPags);
   }

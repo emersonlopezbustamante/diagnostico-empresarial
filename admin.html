@@ -1200,68 +1200,116 @@ const BLOQUES_DIAG = [
 
 const RECOMENDACIONES_DIAG = {
   sst:{
-    basico:{texto:"PRIORITARIO: No cuenta con SG-SST implementado. Riesgo de sanciones y accidentes laborales.",
-      servicios:["Asesoría SG-SST desde cero","Acompañamiento Resolución 0312/2019","Capacitación identificación de peligros","Formación COPASST"]},
-    medio:{texto:"En proceso de implementación del SG-SST. Requiere refuerzo en componentes clave.",
-      servicios:["Auditoría y diagnóstico del SG-SST","Capacitaciones prevención de riesgos","Formación investigación de accidentes","Asesoría estándares mínimos"]},
-    alto:{texto:"Buen nivel de gestión SST. Mantener y mejorar el sistema continuamente.",
-      servicios:["Auditorías periódicas SG-SST","Formación avanzada seguridad industrial","Actualización normativa"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa no cuenta con un Sistema de Gestion de Seguridad y Salud en el Trabajo (SG-SST) implementado ni con los estandares minimos exigidos por la Resolucion 0312 de 2019. Esta condicion representa un riesgo legal significativo ante posibles inspecciones del Ministerio de Trabajo, asi como una exposicion directa a accidentes laborales, enfermedades profesionales y sanciones economicas que pueden comprometer la continuidad del negocio. Se recomienda iniciar de manera inmediata la construccion del sistema con apoyo especializado.",
+      analisis:"La ausencia de un SG-SST activo implica que los trabajadores carecen de protocolos claros de seguridad, identificacion de peligros y medidas de control. Adicionalmente, la empresa pierde acceso a beneficios de la ARL y queda expuesta a demandas por accidentes de trabajo. La implementacion del sistema, ademas de cumplir la normativa, genera cultura de autocuidado y reduce el ausentismo laboral.",
+      servicios:["Asesoria e implementacion SG-SST desde cero con documentacion completa","Acompanamiento en cumplimiento Resolucion 0312/2019 segun nivel de riesgo","Capacitacion en identificacion y valoracion de peligros (GTC-45)","Conformacion y formacion del COPASST y Comite de Convivencia Laboral","Elaboracion de plan de emergencias y brigadas de primera respuesta"]},
+    medio:{
+      texto:"La empresa tiene avances en la implementacion del SG-SST pero presenta brechas en componentes esenciales que afectan la calidad del sistema. Los registros documentales pueden estar incompletos, los procesos de investigacion de incidentes no se aplican de forma sistematica, o los trabajadores no reciben la capacitacion periodica requerida. Fortalecer estos aspectos es fundamental para alcanzar los estandares minimos y avanzar hacia un sistema maduro.",
+      analisis:"Un SG-SST en nivel medio indica voluntad institucional pero ejecucion parcial. Los riesgos mas frecuentes en esta etapa son: indicadores de accidentalidad sin seguimiento, EPP disponibles pero sin control de uso, y COPASST conformado pero inactivo. La Agencia de Empleo puede apoyar el cierre de estas brechas con formacion especializada y acompanamiento tecnico.",
+      servicios:["Auditoria integral del SG-SST e identificacion de brechas documentales","Capacitacion en investigacion de accidentes e incidentes de trabajo","Actualizacion del programa de vigilancia epidemiologica y matriz de peligros","Formacion COPASST: funciones, actas, inspecciones y seguimiento","Asesoria en estandares minimos y autoevaluacion del sistema"]},
+    alto:{
+      texto:"La empresa demuestra un nivel alto de madurez en la gestion de seguridad y salud en el trabajo. Cuenta con los elementos esenciales del SG-SST implementados, documentados y en seguimiento. Este logro refleja compromiso gerencial y una cultura de seguridad instalada en la organizacion. El reto ahora es mantener la vigencia del sistema, actualizar la matriz de peligros ante cambios en los procesos productivos e innovar en practicas preventivas.",
+      analisis:"Las empresas con SG-SST solido presentan menores tasas de accidentalidad, menor rotacion por causas de salud y un ambiente laboral mas confiable. La Agencia de Empleo puede aportar formacion de alto nivel para certificar competencias del equipo de seguridad y apoyar la mejora continua del sistema.",
+      servicios:["Auditorias periodicas externas del SG-SST para garantizar vigencia","Formacion avanzada en seguridad industrial y gestion del riesgo","Actualizacion normativa permanente (decretos, resoluciones MINTRABAJO)","Certificacion de coordinadores y lideres de SST","Programa de incentivos y cultura de seguridad para toda la organizacion"]}
   },
   psico:{
-    basico:{texto:"PRIORITARIO: Sin gestión de riesgos psicosociales. Puede afectar salud mental y generar sanciones.",
-      servicios:["Aplicación Batería Riesgo Psicosocial","Conformación Comité de Convivencia","Talleres manejo del estrés y salud mental","Liderazgo saludable para jefes"]},
-    medio:{texto:"Conciencia de riesgos psicosociales pero requiere fortalecer intervención.",
-      servicios:["Plan de acción Batería Psicosocial","Capacitación Ley 1010 – Acoso laboral","Talleres inteligencia emocional","Protocolos de atención a situaciones críticas"]},
-    alto:{texto:"Gestión adecuada de riesgos psicosociales. Mantener y actualizar intervenciones.",
-      servicios:["Reevaluación periódica psicosocial","Formación continua bienestar emocional","Actualización protocolos convivencia"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa no ha aplicado la Bateria de Riesgo Psicosocial ni cuenta con programas de intervencion en factores de riesgo psicosocial, lo cual constituye una obligacion legal segun la Resolucion 2646 de 2008. Esta omision puede derivar en problemas de salud mental entre los trabajadores, deterioro del clima laboral, alta rotacion y eventualmente sanciones administrativas. La intervencion temprana en este campo tiene un impacto directo en la productividad y la retencion del talento.",
+      analisis:"La exposicion prolongada a factores de riesgo psicosocial sin intervencion genera burnout, ausentismo, conflictos interpersonales y bajo rendimiento. El Ministerio de Trabajo ha intensificado la vigilancia en este aspecto, especialmente en empresas con jornadas extensas o alta presion productiva. Implementar la bateria y actuar sobre sus resultados es una inversion en la sostenibilidad del capital humano.",
+      servicios:["Aplicacion Bateria de Riesgo Psicosocial (Resolucion 2646/2008) con informe ejecutivo","Conformacion y capacitacion del Comite de Convivencia Laboral (CONVIVENCIA)","Talleres de manejo del estres, autocuidado emocional y mindfulness laboral","Programa de liderazgo saludable para jefes y coordinadores","Protocolo de prevencion y atencion de acoso laboral (Ley 1010/2006)"]},
+    medio:{
+      texto:"La empresa reconoce la importancia de la gestion psicosocial y ha dado pasos iniciales, pero la intervencion aun es reactiva o no sistematizada. Es posible que cuente con Comite de Convivencia pero sin seguimiento activo, o que haya aplicado la bateria sin implementar un plan de accion sobre sus resultados. El nivel medio indica consciencia del problema pero insuficiencia en la respuesta institucional.",
+      analisis:"Cuando los resultados de la bateria existen pero no se actua sobre ellos, los factores de riesgo persisten y los trabajadores perciben que la empresa no toma en serio su bienestar. Esto genera desconfianza y puede profundizar los problemas identificados. La clave en esta etapa es pasar del diagnostico a la accion con programas concretos y medibles.",
+      servicios:["Plan de accion sobre resultados de la Bateria Psicosocial con indicadores de seguimiento","Capacitacion Ley 1010: prevencion y manejo del acoso laboral","Talleres de inteligencia emocional y manejo de conflictos para equipos de trabajo","Protocolos de atencion psicologica y canales de reporte confidencial","Formacion en desconexion digital y equilibrio trabajo-vida personal"]},
+    alto:{
+      texto:"La empresa presenta un nivel sobresaliente en la gestion de riesgos psicosociales. Ha implementado la bateria, cuenta con planes de accion vigentes y sus trabajadores perciben un entorno de trabajo saludable. Este nivel de madurez favorece la retencion del talento, la productividad sostenida y la reputacion corporativa como empleador responsable.",
+      analisis:"Las organizaciones con alto bienestar psicosocial registran menores tasas de ausentismo y mayor compromiso de sus colaboradores. Mantener este nivel requiere actualizaciones periodicas de la bateria, reevaluacion de programas y apertura a nuevas metodologias de bienestar integral que respondan a las necesidades cambiantes del equipo.",
+      servicios:["Reevaluacion periodica de la Bateria Psicosocial (cada dos anos o ante cambios estructurales)","Formacion continua en salud mental positiva y resiliencia organizacional","Actualizacion de protocolos de convivencia y prevencion del acoso","Benchmarking de bienestar laboral con empresas del sector","Programa de reconocimiento al bienestar como valor organizacional"]}
   },
   admin:{
-    basico:{texto:"Debilidades importantes en gestión contable y administrativa.",
-      servicios:["Asesoría contable y tributaria para PYMES","Formación gestión financiera básica","Acompañamiento formalización empresarial","Orientación obligaciones como empleador"]},
-    medio:{texto:"Gestión contable presente pero puede mejorar en indicadores y control.",
-      servicios:["Consultoría control de costos y rentabilidad","Formación herramientas gestión financiera","Asesoría optimización de nómina"]},
-    alto:{texto:"Buenas prácticas de gestión administrativa.",
-      servicios:["Consultoría en sistemas de información gerencial","Formación presupuestación y proyecciones"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa evidencia debilidades estructurales en su gestion contable y administrativa que limitan su sostenibilidad financiera y su capacidad de cumplir con las obligaciones tributarias y laborales. La falta de registros confiables, la ausencia de presupuestos formales y las deficiencias en el manejo de nomina exponen a la empresa a contingencias fiscales, sanciones de la DIAN y dificultades para acceder a financiamiento o contratos con el sector publico o privado.",
+      analisis:"Una gestion contable debil impide conocer la rentabilidad real del negocio, anticipa problemas de liquidez y dificulta la toma de decisiones basada en datos. Para una PYME, este es frecuentemente el cuello de botella que impide el crecimiento sostenible. Formalizar los procesos contables y administrativos es el primer paso para competir en mercados mas exigentes.",
+      servicios:["Asesoria contable y tributaria para PYMES: organizacion de libros, declaraciones y obligaciones","Formacion en gestion financiera basica para directivos y administradores","Acompanamiento en procesos de formalizacion empresarial y registro mercantil","Orientacion sobre obligaciones como empleador: nomina, parafiscales y seguridad social","Implementacion de herramientas de control presupuestal accesibles para PYMES"]},
+    medio:{
+      texto:"La empresa cuenta con una base contable y administrativa funcional, pero presenta oportunidades de mejora en la utilizacion de indicadores de gestion, el control de costos y la optimizacion de la nomina. Si bien los registros basicos existen, la informacion financiera no se usa de manera estrategica para tomar decisiones de crecimiento o para identificar areas de ineficiencia.",
+      analisis:"En este nivel, el reto principal es transitar de una contabilidad de cumplimiento a una contabilidad gerencial que aporte valor a la direccion. Herramientas como el flujo de caja proyectado, el analisis de costos por producto o servicio, y los indicadores financieros clave permiten anticipar problemas y capturar oportunidades de rentabilidad.",
+      servicios:["Consultoria en control de costos, rentabilidad y punto de equilibrio","Formacion en herramientas de gestion financiera para directivos","Asesoria en optimizacion y liquidacion correcta de nomina","Diseno de tablero de indicadores financieros (KPIs)","Acompanamiento en elaboracion de presupuestos y flujo de caja"]},
+    alto:{
+      texto:"La empresa demuestra solidez en su gestion contable y administrativa, con procesos documentados, indicadores de seguimiento y cumplimiento oportuno de sus obligaciones fiscales y laborales. Este nivel de madurez es un activo estrategico que facilita el acceso a credito, la participacion en licitaciones y la confianza de inversionistas y aliados comerciales.",
+      analisis:"Mantener y elevar la calidad de la gestion administrativa requiere actualizacion permanente ante cambios tributarios y laborales, asi como la incorporacion de tecnologias que automatizan procesos repetitivos y liberan tiempo para el analisis estrategico. La Agencia puede apoyar la formacion del equipo contable y administrativo en herramientas de vanguardia.",
+      servicios:["Consultoria en sistemas de informacion gerencial y ERP para PYMES","Formacion en presupuestacion, proyecciones financieras y analisis de escenarios","Actualizacion tributaria y laboral permanente (reforma tributaria, reforma laboral)","Asesoria en auditoria interna y control de riesgos financieros","Formacion en facturacion electronica y transformacion digital administrativa"]}
   },
   gerencia:{
-    basico:{texto:"Sin planeación estratégica formal. Limita crecimiento y toma de decisiones.",
-      servicios:["Consultoría planeación estratégica PYMES","Formación gerencial y habilidades directivas","Diseño de plan de negocio","Diagnóstico organizacional integral"]},
-    medio:{texto:"Algunos elementos de planeación. Puede fortalecer la gestión basada en datos.",
-      servicios:["Diseño tablero de control (KPIs)","Formación toma de decisiones","Consultoría gestión por procesos"]},
-    alto:{texto:"Buenas prácticas gerenciales. Mantener mejora continua.",
-      servicios:["Liderazgo transformacional","Consultoría innovación y transformación digital"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa carece de una planeacion estrategica formal, lo que significa que opera de manera reactiva sin una vision clara de largo plazo, objetivos medibles ni estrategias definidas para alcanzarlos. Esta ausencia limita severamente la capacidad de la organizacion para anticiparse a cambios del entorno, tomar decisiones fundamentadas y asignar recursos de manera eficiente. Sin un norte estrategico, el crecimiento depende del azar mas que de la gestion.",
+      analisis:"Las empresas sin planeacion estrategica suelen quedar atrapadas en el dia a dia, sin capacidad para identificar oportunidades de mercado ni prepararse para amenazas competitivas. La alta dependencia de la figura del fundador, la ausencia de estructura organizacional clara y la falta de indicadores de desempeno son sintomas frecuentes en este nivel que la Agencia puede ayudar a transformar.",
+      servicios:["Consultoria en planeacion estrategica para PYMES: mision, vision, valores y objetivos","Formacion gerencial en habilidades directivas, liderazgo y toma de decisiones","Diseno del modelo de negocio y mapa de procesos organizacionales","Diagnostico organizacional integral con plan de mejoramiento","Acompanamiento en construccion de indicadores de gestion (cuadro de mando integral)"]},
+    medio:{
+      texto:"La empresa tiene algunos elementos de planeacion y direccion estrategica, pero su aplicacion es parcial o inconsistente. Puede existir una declaracion de mision y vision que no se traduce en objetivos operativos, o indicadores que se definen pero no se monitorean regularmente. El equipo directivo reconoce la importancia de la estrategia pero aun no ha logrado integrarla al quehacer cotidiano de la organizacion.",
+      analisis:"El salto del nivel medio al nivel alto en gestion gerencial requiere disciplina en el seguimiento de indicadores, comunicacion clara de la estrategia a todos los niveles de la organizacion y una cultura de rendicion de cuentas. Las herramientas de gestion basada en datos permiten que la alta direccion tome decisiones con mayor confianza y velocidad.",
+      servicios:["Diseno e implementacion de tablero de control con KPIs estrategicos y operativos","Formacion en toma de decisiones basada en datos y analisis de informacion","Consultoria en gestion por procesos y mejora continua","Programa de desarrollo de liderazgo para mandos medios y directivos","Coaching ejecutivo para fortalecer capacidades de direccion"]},
+    alto:{
+      texto:"La empresa evidencia un alto nivel de madurez gerencial con planeacion estrategica activa, indicadores de gestion monitoreados y una cultura organizacional alineada con los objetivos institucionales. La alta direccion toma decisiones basadas en informacion y ha logrado involucrar a su equipo en la construccion y ejecucion de la estrategia.",
+      analisis:"Las organizaciones con gestion gerencial madura tienen mayor capacidad de adaptacion ante cambios del entorno, mejor clima laboral y resultados financieros mas predecibles. El reto en este nivel es la innovacion continua y la preparacion para el relevo generacional o la escala del negocio.",
+      servicios:["Consultoria en innovacion organizacional y transformacion digital","Formacion en liderazgo transformacional y gestion del cambio","Diseno de programas de sucesion y desarrollo de talento directivo","Benchmarking estrategico con empresas lideres del sector","Acompanamiento en procesos de crecimiento: expansion, franquicias o alianzas"]}
   },
   legal:{
-    basico:{texto:"PRIORITARIO: Riesgos legales por desconocimiento de normatividad laboral vigente.",
-      servicios:["Asesoría jurídica laboral para PYMES","Taller Reforma Laboral vigente","Formación contratación laboral","Orientación Ley 1010 y Ley 1257"]},
-    medio:{texto:"Conocimiento parcial de normatividad. Requiere actualización y acompañamiento.",
-      servicios:["Actualización Reforma Laboral","Revisión y actualización de contratos","Formación desconexión digital Ley 2191/2022"]},
-    alto:{texto:"Buen manejo legal. Mantenerse actualizado ante cambios normativos.",
-      servicios:["Alertas de cambios normativos","Capacitación continua equipo RRHH"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa presenta riesgos legales significativos derivados del desconocimiento o incumplimiento de la normatividad laboral vigente. La Reforma Laboral, la Ley de Desconexion Digital (Ley 2191/2022), la regulacion de contratos por prestacion de servicios y las obligaciones en materia de acoso laboral (Ley 1010/2006) son aspectos que, de no cumplirse, pueden generar demandas judiciales, sanciones administrativas y deterioro de la reputacion como empleador.",
+      analisis:"El incumplimiento laboral no solo genera costos directos por sanciones y condenas, sino que impacta el clima organizacional y la confianza de los trabajadores. En un entorno juridico en constante cambio, las PYMES son especialmente vulnerables por carecer de departamentos juridicos propios. El acompanamiento especializado permite anticiparse a los riesgos y construir relaciones laborales solidas y transparentes.",
+      servicios:["Asesoria juridica laboral para PYMES: revision de contratos, nomina y obligaciones","Taller practico sobre la Reforma Laboral vigente y sus impactos en la empresa","Formacion en contratacion laboral: tipos de contrato, clausulas y terminos legales","Orientacion sobre Ley 1010: prevencion y manejo del acoso laboral","Capacitacion en desconexion digital (Ley 2191/2022) y su aplicacion practica"]},
+    medio:{
+      texto:"La empresa tiene un conocimiento parcial de la normatividad laboral y ha dado pasos para cumplir con las obligaciones basicas, pero persisten areas de incertidumbre que la exponen a riesgos juridicos. Los cambios normativos recientes, como la reforma laboral y las nuevas disposiciones sobre trabajo en casa y plataformas digitales, requieren una actualizacion permanente del equipo administrativo y de RRHH.",
+      analisis:"El riesgo en este nivel reside en la confianza de que lo que se ha hecho siempre es suficiente. La normatividad laboral colombiana evoluciona constantemente y lo que era correcto hace dos anos puede no serlo hoy. Una revision juridica periodica permite identificar exposiciones ocultas y corregirlas antes de que se conviertan en litigios.",
+      servicios:["Actualizacion sobre la Reforma Laboral y cambios normativos recientes","Revision y actualizacion de contratos laborales y clausulas de riesgo","Formacion en desconexion digital, trabajo hibrido y nuevas formas de vinculacion","Asesoria en liquidacion de contratos y manejo de terminaciones laborales","Revision del reglamento interno de trabajo segun normativa vigente"]},
+    alto:{
+      texto:"La empresa demuestra un solido cumplimiento de la normatividad laboral vigente y cuenta con procesos documentados para la gestion juridica del talento humano. Este nivel de cumplimiento es un diferenciador competitivo importante, especialmente en procesos de licitacion, certificaciones y relaciones con clientes corporativos que valoran la responsabilidad social empresarial.",
+      analisis:"Mantener el cumplimiento legal requiere vigilancia permanente ante las continuas reformas del derecho laboral colombiano. La Agencia de Empleo puede apoyar con actualizaciones periodicas, formacion del equipo de RRHH y alertas tempranas sobre cambios normativos que puedan impactar la operacion.",
+      servicios:["Servicio de alertas normativas laborales y tributarias de forma periodica","Capacitacion continua al equipo de RRHH sobre cambios legislativos","Revision juridica preventiva de contratos y practicas de vinculacion","Asesoria en procesos de certificacion laboral y responsabilidad social","Formacion avanzada en derecho laboral para lideres de personas"]}
   },
   clima:{
-    basico:{texto:"Sin medición de clima ni planes de bienestar. Afecta retención de talento.",
-      servicios:["Medición Clima Organizacional con informe","Diseño Plan de Bienestar Laboral anual","Talleres motivación y sentido de pertenencia","Programa de reconocimiento"]},
-    medio:{texto:"Iniciativas de bienestar presentes. Puede sistematizarlas y medir impacto.",
-      servicios:["Diagnóstico clima con benchmarking","Diseño programas bienestar con presupuesto","Gestión del cambio organizacional"]},
-    alto:{texto:"Buenas prácticas de clima y bienestar. Mantener medición periódica.",
-      servicios:["Medición semestral de clima","Benchmarking sectorial de bienestar"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa no cuenta con mediciones de clima organizacional ni con programas estructurados de bienestar laboral. Esta omision impacta directamente en la satisfaccion, el compromiso y la permanencia de los trabajadores, generando ciclos de alta rotacion que incrementan los costos de seleccion, capacitacion y adaptacion de nuevo personal. Un entorno laboral percibido como indiferente al bienestar del colaborador dificulta atraer y retener talento en un mercado cada vez mas competitivo.",
+      analisis:"La investigacion en psicologia organizacional demuestra que los trabajadores que perciben que su empresa se preocupa por su bienestar son significativamente mas productivos, leales y creativos. Ignorar el clima organizacional es ignorar uno de los activos mas valiosos de la empresa: su capital humano. La medicion y la intervencion en clima no son un gasto, son una inversion con retorno directo en productividad.",
+      servicios:["Medicion de Clima Organizacional con encuesta validada e informe ejecutivo","Diseno del Plan de Bienestar Laboral anual con actividades y presupuesto","Talleres de motivacion, sentido de pertenencia e identidad corporativa","Programa de reconocimiento al desempeno y celebracion de logros","Acompanamiento en comunicacion interna y canales de retroalimentacion"]},
+    medio:{
+      texto:"La empresa ha iniciado iniciativas de bienestar y ha realizado algunas acciones para mejorar el ambiente laboral, pero estas intervenciones son dispersas, no sistematizadas y en muchos casos no se mide su impacto. El riesgo en este nivel es que los trabajadores perciban las acciones de bienestar como superficiales o desconectadas de sus necesidades reales, lo que puede generar escepticismo y reducir el efecto esperado.",
+      analisis:"El clima organizacional en nivel medio indica que hay intencion pero falta metodologia. Sistematizar las acciones de bienestar, medir periodicamente la percepcion de los colaboradores y articular los resultados con la estrategia de gestion humana permite potenciar el impacto de las inversiones que ya se realizan.",
+      servicios:["Diagnostico de clima organizacional con benchmarking sectorial","Diseno de programas de bienestar laboral basados en resultados de la medicion","Formacion en gestion del cambio y comunicacion organizacional efectiva","Implementacion de canales de escucha activa y encuestas de pulso periodicas","Consultoria en programas de engagement y retencion de colaboradores clave"]},
+    alto:{
+      texto:"La empresa ha construido una cultura organizacional solida con indicadores positivos de clima, programas de bienestar activos y canales de comunicacion efectivos. Sus trabajadores reportan satisfaccion con el entorno laboral y la organizacion utiliza esta fortaleza como elemento diferenciador en la atraccion de talento. Mantener este nivel requiere medicion periodica, adaptacion a las necesidades cambiantes del equipo y renovacion constante de los programas de bienestar.",
+      analisis:"Las empresas con alto clima organizacional tienen hasta un 21% mas de rentabilidad segun estudios de Gallup, producto de mayor compromiso, menor ausentismo y mejor servicio al cliente. Este activo intangible debe protegerse con mediciones regulares y la voluntad de actuar sobre los resultados, especialmente ante cambios en la estructura o la direccion.",
+      servicios:["Medicion semestral de clima organizacional con comparativo historico","Benchmarking de bienestar laboral con empresas lideres del sector","Diseno de programas de bienestar innovadores alineados con tendencias globales","Formacion en liderazgo positivo y gestion del bienestar para jefes","Consultoria en estrategia de employer branding y cultura organizacional"]}
   },
   capacitacion:{
-    basico:{texto:"Sin plan de capacitación ni rutas de crecimiento para empleados.",
-      servicios:["Diseño Plan de Capacitaciones anual","Portafolio formación Comfenalco Antioquia (sin costo para afiliados)","Ruta de Empleabilidad","Asesoría Plan Carrera por competencias"]},
-    medio:{texto:"Algunas capacitaciones. Puede mejorar planeación y medición de impacto.",
-      servicios:["Diagnóstico necesidades de formación","Rutas de aprendizaje por cargo","Evaluación de impacto de capacitaciones"]},
-    alto:{texto:"Plan de capacitación bien estructurado. Innovar en metodologías.",
-      servicios:["Formación e-learning y blended learning","Certificación competencias laborales"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa no cuenta con un plan formal de capacitacion ni con rutas de desarrollo profesional para sus colaboradores. Esta carencia tiene consecuencias multiples: los trabajadores se sienten estancados y sin perspectivas de crecimiento, las competencias del equipo no evolucionan al ritmo del mercado y la empresa pierde competitividad al no actualizar las habilidades de su fuerza laboral. La formacion es una obligacion legal del empleador y un factor critico de retencion del talento.",
+      analisis:"Segun estudios del mercado laboral colombiano, la falta de oportunidades de desarrollo es una de las principales razones por las que los trabajadores renuncian. Invertir en formacion no solo retiene al talento sino que incrementa la productividad, reduce errores operativos y prepara a la organizacion para los retos tecnologicos y competitivos del futuro.",
+      servicios:["Diseno del Plan Anual de Capacitaciones con levantamiento de necesidades por cargo","Acceso al portafolio de formacion de Comfenalco Antioquia (beneficio para afiliados)","Construccion de la Ruta de Empleabilidad por competencias laborales","Asesoria en diseno de Plan Carrera y desarrollo de lideres internos","Gestion de subsidios y apoyos economicos para formacion del SENA y otras entidades"]},
+    medio:{
+      texto:"La empresa realiza capacitaciones de manera irregular o centradas en temas especificos, sin un plan estructurado que responda a las necesidades reales de cada cargo. Las capacitaciones actuales pueden carecer de medicion de impacto, lo que hace dificil demostrar su retorno sobre la inversion y justificar la asignacion de recursos. Un plan de formacion bien estructurado es la herramienta para llevar al equipo al siguiente nivel de competencia.",
+      analisis:"La diferencia entre capacitar y formar reside en la sistematicidad y el seguimiento. Una empresa con nivel medio en este aspecto tiene las condiciones para dar el salto: ya reconoce la importancia de la formacion y ha destinado recursos para ella. El siguiente paso es disenar rutas de aprendizaje coherentes con los objetivos estrategicos y medir el cambio en desempeno.",
+      servicios:["Diagnostico de necesidades de formacion por cargo y nivel organizacional","Diseno de rutas de aprendizaje individualizadas por perfil de competencias","Implementacion de mecanismos de evaluacion de impacto de las capacitaciones","Asesoria en elaboracion del presupuesto de formacion y gestion de cofinanciacion","Acceso a formacion en modalidad virtual y semipresencial del portafolio Comfenalco"]},
+    alto:{
+      texto:"La empresa cuenta con un plan de capacitacion estructurado, alineado con sus objetivos estrategicos y con rutas de desarrollo definidas para sus colaboradores. Los trabajadores perciben las oportunidades de formacion como un beneficio tangible que contribuye a su crecimiento profesional y personal, lo cual fortalece el sentido de pertenencia y la lealtad hacia la organizacion.",
+      analisis:"El reto para las empresas con alta madurez en formacion es innovar en metodologias y mantenerse a la vanguardia en competencias digitales, habilidades blandas y gestion del conocimiento. Tambien es clave documentar y transferir el conocimiento interno para que no dependa de personas especificas sino que quede institucionalizado.",
+      servicios:["Formacion en metodologias innovadoras: e-learning, microlearning y aprendizaje experiencial","Programa de certificacion de competencias laborales con aval oficial","Consultoria en gestion del conocimiento y construccion de comunidades de aprendizaje","Diseno de programas de mentoria y transferencia de conocimiento interno","Alianzas con instituciones de educacion superior para formacion avanzada del equipo"]}
   },
   talento:{
-    basico:{texto:"Sin procesos formales de selección y gestión del talento humano.",
-      servicios:["Servicio Selección de Personal – Agencia de Empleo","Diseño perfiles de cargo por competencias","Proceso de inducción y reinducción","Asesoría evaluación de desempeño"]},
-    medio:{texto:"Algunos procesos de talento. Puede fortalecer con herramientas.",
-      servicios:["Sistema de evaluación de desempeño","Formación entrevistas por competencias","Consultoría gestión del compromiso"]},
-    alto:{texto:"Buenas prácticas de gestión del talento.",
-      servicios:["Consultoría employer branding","Active Placement – Retención de talento"]}
+    basico:{
+      texto:"SITUACION CRITICA: La empresa carece de procesos formales para la seleccion, vinculacion, induccion y gestion del desempeno de sus trabajadores. Esta informalidad genera contrataciones inadecuadas que elevan los costos de rotacion, ausencia de estandares de desempeno que afectan la productividad, y dificultades para identificar y retener a los colaboradores con mayor potencial. Una gestion del talento debil es una de las principales causas de inestabilidad laboral y problemas de calidad en las organizaciones.",
+      analisis:"El proceso de seleccion es la primera decision critica en la gestion del talento: contratar a la persona equivocada puede costar hasta tres veces su salario anual entre procesos de desvinculacion, nueva seleccion y curva de aprendizaje. Implementar procesos formales y basados en competencias desde la seleccion hasta la evaluacion del desempeno es la base para construir equipos de alto rendimiento.",
+      servicios:["Servicio de Seleccion de Personal a traves de la Agencia de Empleo de Comfenalco","Diseno de perfiles de cargo por competencias laborales y tecnicas","Implementacion del proceso de induccion y reinduccion corporativa","Asesoria en diseno e implementacion de evaluacion de desempeno","Acompanamiento en politicas de retencion y planes de carrera para colaboradores clave"]},
+    medio:{
+      texto:"La empresa tiene algunos procesos de gestion del talento funcionando, pero de manera inconsistente o con brechas importantes en la medicion del desempeno y la planificacion de la sucesion. Los procesos de seleccion pueden depender excesivamente de referidos o criterios subjetivos, y la evaluacion del desempeno, si existe, no genera planes de accion concretos ni se vincula con decisiones de promocion o compensacion.",
+      analisis:"El nivel medio en gestion del talento indica que la empresa ha avanzado pero que aun pierde oportunidades de potenciar a su equipo. Las personas con alto desempeno pueden no estar recibiendo reconocimiento ni retos suficientes, lo que aumenta el riesgo de fuga de talento. Sistematizar y profesionalizar los procesos de gestion humana es el camino para construir una organizacion de alto rendimiento.",
+      servicios:["Implementacion de sistema de evaluacion de desempeno por objetivos y competencias","Formacion en entrevistas por competencias para quienes lideran procesos de seleccion","Consultoria en gestion del compromiso organizacional y motivacion del equipo","Diseno de politicas de compensacion y beneficios competitivos en el mercado","Programa de identificacion y desarrollo de colaboradores con alto potencial"]},
+    alto:{
+      texto:"La empresa cuenta con procesos robustos de gestion del talento que incluyen seleccion por competencias, induccion estructurada, evaluacion periodica del desempeno y planes de desarrollo individualizados. Esta capacidad organizacional le permite construir equipos solidos, reducir la rotacion no deseada y contar con un banco de talento interno para cubrir vacantes criticas.",
+      analisis:"Las organizaciones con alta madurez en gestion del talento deben enfocarse ahora en el employer branding para atraer los mejores perfiles del mercado, en la planificacion de la sucesion para roles criticos y en la incorporacion de tecnologia en los procesos de gestion humana para hacerlos mas agiles y basados en datos.",
+      servicios:["Consultoria en employer branding y posicionamiento como empleador atractivo","Programa de Active Placement para retencion y movilidad interna del talento","Asesoria en planificacion de la sucesion y desarrollo de lideres internos","Implementacion de tecnologia HRIS para gestion integral del talento","Benchmarking de practicas de gestion humana con empresas de alto desempeno"]}
   }
 };
 
@@ -1493,20 +1541,24 @@ async function generarPDFDiag() {
   function drawHeader(isFirst) {
     doc.setFillColor(...VERDE); doc.rect(0,0,W,isFirst?36:14,"F");
     doc.setFillColor(...VERDE_PIST); doc.rect(0,isFirst?34:13,W,2,"F");
+    // Fondo blanco para logos
+    doc.setFillColor(255,255,255);
+    if (logo1Src)  doc.roundedRect(MARGIN-1, isFirst?3:0.5, 50, isFirst?26:13, 2, 2, "F");
+    if (logo2Src)  doc.roundedRect(W-MARGIN-41, isFirst?4:0.5, 42, isFirst?24:13, 2, 2, "F");
     try {
-      if (logo1Src) doc.addImage(logo1Src,"JPEG",MARGIN, isFirst?5:1.5, 46, isFirst?22:10);
-      if (logo2Src) doc.addImage(logo2Src,"PNG",  W-MARGIN-38, isFirst?6:1.5, 38, isFirst?20:10);
+      if (logo1Src) doc.addImage(logo1Src,"JPEG",MARGIN+1, isFirst?5:1.5, 46, isFirst?22:10);
+      if (logo2Src) doc.addImage(logo2Src,"PNG",  W-MARGIN-39, isFirst?6:1.8, 38, isFirst?20:10);
     } catch(e){}
     if (isFirst) {
       doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(12);
       doc.text("DIAGNÓSTICO EMPRESARIAL INTEGRAL", W/2, 15, {align:"center"});
       doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
-      doc.text("Agencia de Empleo y Emprendimiento · Comfenalco Antioquia", W/2, 21.5, {align:"center"});
+      doc.text("Agencia de Empleo y Emprendimiento  Comfenalco Antioquia", W/2, 21.5, {align:"center"});
       doc.setFontSize(7.5);
       doc.text(`Generado: ${new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"})}`, W/2, 27, {align:"center"});
     } else {
       doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
-      doc.text("DIAGNÓSTICO EMPRESARIAL · " + (d.nombre_empresa||empresaActual).toUpperCase(), MARGIN+50, 9);
+      doc.text("DIAGNÓSTICO EMPRESARIAL  " + (d.nombre_empresa||empresaActual).toUpperCase(), MARGIN+50, 9);
     }
   }
 
@@ -1515,16 +1567,17 @@ async function generarPDFDiag() {
     doc.setFillColor(232,244,239); doc.rect(0,285,W,12,"F");
     doc.setDrawColor(...VERDE_PIST); doc.setLineWidth(0.3); doc.line(0,285,W,285);
     doc.setTextColor(...VERDE); doc.setFont("helvetica","normal"); doc.setFontSize(7);
-    doc.text("Comfenalco Antioquia · Agencia de Empleo y Emprendimiento · Servicio Público de Empleo", MARGIN, 292);
+    doc.text("Comfenalco Antioquia  Agencia de Empleo y Emprendimiento  Servicio Público de Empleo", MARGIN, 292);
     doc.text(`Pág. ${pageNum} de ${totalPages}`, W-MARGIN, 292, {align:"right"});
   }
 
   // ── Helper: sección título
   function sectionTitle(txt, y) {
-    doc.setFillColor(...VERDE); doc.roundedRect(MARGIN,y,CW,9,2,2,"F");
-    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(10);
-    doc.text(txt, MARGIN+6, y+6.2);
-    return y+13;
+    doc.setFillColor(...VERDE); doc.roundedRect(MARGIN,y,CW,10,2,2,"F");
+    doc.setFillColor(...VERDE_PIST); doc.roundedRect(MARGIN,y,5,10,1,1,"F");
+    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(9.5);
+    doc.text(txt, MARGIN+9, y+6.8);
+    return y+14;
   }
 
   let y = 0;
@@ -1543,16 +1596,16 @@ async function generarPDFDiag() {
   const col2 = MARGIN+CW/2+4;
   doc.text(`Empresa: ${d.nombre_empresa||empresaActual}`, MARGIN+9, y+16);
   doc.text(`NIT: ${d.nit||""}`, MARGIN+9, y+23);
-  doc.text(`Municipio: ${d.municipio||""} · ${d.dpto||""}`, MARGIN+9, y+30);
+  doc.text(`Municipio: ${d.municipio||""}  ${d.dpto||""}`, MARGIN+9, y+30);
   doc.text(`Dirección: ${d.direccion||""}`, MARGIN+9, y+37);
-  doc.text(`Responsable: ${d.persona||""} · ${d.cargo||""}`, col2, y+16);
+  doc.text(`Responsable: ${d.persona||""}  ${d.cargo||""}`, col2, y+16);
   doc.text(`Doc.: ${d.tipo_doc||""} ${d.num_doc||""}`, col2, y+23);
   doc.text(`Tiempo en empresa: ${d.tiempo||""}`, col2, y+30);
   doc.text(`Fecha diagnóstico: ${(d.fecha||"").slice(0,10)}`, col2, y+37);
   y += 51;
 
   // Resultados síntesis — tarjetas 4x2
-  y = sectionTitle("📊 RESULTADOS POR ÁREA — VISTA GENERAL", y);
+  y = sectionTitle(" RESULTADOS POR ÁREA  VISTA GENERAL", y);
   const colW4 = CW/4;
   BLOQUES_DIAG.forEach((bloque,i)=>{
     const col = i%4;
@@ -1574,14 +1627,14 @@ async function generarPDFDiag() {
 
   // Gráfica barras general (desde canvas)
   if (imgBarras) {
-    y = sectionTitle("📈 NIVEL (%) POR ÁREA", y);
+    y = sectionTitle(" NIVEL (%) POR ÁREA", y);
     doc.addImage(imgBarras,"PNG",MARGIN,y,CW,55);
     y += 59;
   }
 
   // Gráfica dona + radar en fila
   if (imgDona || imgRadar) {
-    y = sectionTitle("🎯 DISTRIBUCIÓN DE NIVELES & PERFIL DE MADUREZ", y);
+    y = sectionTitle(" DISTRIBUCIÓN DE NIVELES & PERFIL DE MADUREZ", y);
     if (imgDona)  doc.addImage(imgDona,"PNG",  MARGIN,        y, CW/2-4, 55);
     if (imgRadar) doc.addImage(imgRadar,"PNG", MARGIN+CW/2+4, y, CW/2-4, 55);
     y += 59;
@@ -1623,7 +1676,7 @@ async function generarPDFDiag() {
     doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(12);
     doc.text(bloque.titulo.toUpperCase(), MARGIN+10, y+6);
     doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
-    doc.text(`Nivel: ${nivelLabel(nivel)} · Puntaje global: ${Math.round(pct*100)}%`, MARGIN+10, y+12);
+    doc.text(`Nivel: ${nivelLabel(nivel)}  Puntaje global: ${Math.round(pct*100)}%`, MARGIN+10, y+12);
     y += 19;
 
     // ── Gráfica del área (canvas capturado)
@@ -1654,27 +1707,45 @@ async function generarPDFDiag() {
     y += 62;
 
     // ── Análisis de nivel
-    const nivelTexto = nivel==="alto"?"✅ FORTALEZA":nivel==="medio"?"⚠️ EN DESARROLLO":"🔴 ÁREA CRÍTICA";
+    const nivelTexto = nivel==="alto"?"✅ FORTALEZA":nivel==="medio"?"EN DESARROLLO":"ATENCION PRIORITARIA";
     doc.setFillColor(...rgb.map(c=>Math.min(255,c+170)));
     doc.roundedRect(MARGIN, y, CW, 8, 2,2,"F");
     doc.setFillColor(...rgb); doc.roundedRect(MARGIN,y,5,8,1,1,"F");
     doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(9);
-    doc.text(`${nivelTexto} · ${bloque.titulo}`, MARGIN+8, y+5.5);
+    doc.text(`${nivelTexto}  ${bloque.titulo}`, MARGIN+8, y+5.5);
     y += 12;
 
-    // ── Texto diagnóstico
+    // -- Texto diagnostico principal
     if (rec?.texto) {
-      doc.setFillColor(248,252,250); doc.roundedRect(MARGIN, y, CW, 18, 2,2,"F");
-      doc.setTextColor(...GRIS); doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
-      const lineas = doc.splitTextToSize(rec.texto, CW-8);
-      lineas.slice(0,3).forEach((l,li) => doc.text(l, MARGIN+4, y+6+li*5.5));
-      y += 22;
+      const textoPuro = rec.texto;
+      const lineasT = doc.splitTextToSize(textoPuro, CW-10);
+      const nLineas = Math.min(lineasT.length, 6);
+      const alturaT = nLineas * 5.2 + 10;
+      doc.setFillColor(248,252,250); doc.roundedRect(MARGIN, y, CW, alturaT, 2,2,"F");
+      doc.setFillColor(...rgb); doc.roundedRect(MARGIN,y,4,alturaT,1,1,"F");
+      doc.setTextColor(...GRIS); doc.setFont("helvetica","normal"); doc.setFontSize(7.8);
+      lineasT.slice(0,6).forEach((l,li) => doc.text(l, MARGIN+7, y+6+li*5.2));
+      y += alturaT + 4;
+    }
+    // -- Analisis de la situacion
+    if (rec?.analisis) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(8.5); doc.setTextColor(...rgb);
+      doc.text("Analisis de la situacion:", MARGIN, y+4);
+      y += 9;
+      const lineasA = doc.splitTextToSize(rec.analisis, CW-10);
+      const nLineasA = Math.min(lineasA.length, 6);
+      const alturaA = nLineasA * 5.2 + 10;
+      doc.setFillColor(245,250,247); doc.roundedRect(MARGIN,y,CW,alturaA,2,2,"F");
+      doc.setFillColor(...VERDE_PIST); doc.roundedRect(MARGIN,y,4,alturaA,1,1,"F");
+      doc.setTextColor(...GRIS); doc.setFont("helvetica","normal"); doc.setFontSize(7.8);
+      lineasA.slice(0,6).forEach((l,li) => doc.text(l, MARGIN+7, y+6+li*5.2));
+      y += alturaA + 4;
     }
 
     // ── Servicios recomendados
     if (rec?.servicios?.length) {
       doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...VERDE);
-      doc.text("💼 SERVICIOS RECOMENDADOS", MARGIN, y+4);
+      doc.text(" SERVICIOS RECOMENDADOS", MARGIN, y+4);
       y += 9;
       const svcH = rec.servicios.length * 9 + 6;
       doc.setFillColor(232,244,239); doc.roundedRect(MARGIN, y, CW, svcH, 2,2,"F");
@@ -1707,7 +1778,7 @@ async function generarPDFDiag() {
   drawHeader(false);
   y = 20;
 
-  y = sectionTitle("📋 RESUMEN EJECUTIVO Y PLAN DE ACCIÓN", y);
+  y = sectionTitle(" RESUMEN EJECUTIVO Y PLAN DE ACCIÓN", y);
 
   const altos   = BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="alto");
   const medios  = BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="medio");
@@ -1734,7 +1805,7 @@ async function generarPDFDiag() {
 
   // Fortalezas / Oportunidades / Críticos
   const cols3 = CW/3-2;
-  [[altos,"✅ FORTALEZAS",VERDE_ALTO],[medios,"⚙️ EN DESARROLLO",NARANJA],[basicos,"🔴 ÁREAS CRÍTICAS",ROJO]].forEach(([arr,titulo,rgb3],ci)=>{
+  [[altos,"FORTALEZAS",VERDE_ALTO],[medios,"EN DESARROLLO",NARANJA],[basicos,"AREAS CRITICAS",ROJO]].forEach(([arr,titulo,rgb3],ci)=>{
     const x3 = MARGIN+ci*(cols3+3);
     const h3 = Math.max(arr.length*8+14, 30);
     doc.setFillColor(...rgb3.map(c=>Math.min(255,c+165))); doc.roundedRect(x3,y,cols3,h3,2,2,"F");
@@ -1742,18 +1813,18 @@ async function generarPDFDiag() {
     doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(6.5);
     doc.text(titulo, x3+cols3/2, y+4.8, {align:"center"});
     doc.setTextColor(...rgb3); doc.setFont("helvetica","normal"); doc.setFontSize(7);
-    if (arr.length===0) doc.text("—", x3+cols3/2, y+12, {align:"center"});
-    arr.forEach((b,bi)=>doc.text("• "+b.titulo, x3+3, y+12+bi*8));
+    if (arr.length===0) doc.text("", x3+cols3/2, y+12, {align:"center"});
+    arr.forEach((b,bi)=>doc.text(" "+b.titulo, x3+3, y+12+bi*8));
   });
   y += Math.max(altos.length,medios.length,basicos.length)*8+18;
 
   // Plan de acción priorizado
-  y = sectionTitle("🗓️ PLAN DE ACCIÓN PRIORIZADO", y);
+  y = sectionTitle(" PLAN DE ACCIÓN PRIORIZADO", y);
   const orden = [...basicos,...medios,...altos];
   orden.forEach((b,oi)=>{
     const nivel=calcularNivelDiag(d,b.id);
     const rgb=nivel==="alto"?VERDE_ALTO:nivel==="medio"?NARANJA:ROJO;
-    const prioridad=nivel==="basico"?"PRIORIDAD ALTA":nivel==="medio"?"PRIORIDAD MEDIA":"MANTENER";
+    const prioridad=nivel==="basico"?"PRIORIDAD ALTA - ACCION INMEDIATA":nivel==="medio"?"PRIORIDAD MEDIA - ACCION PLANIFICADA":"MANTENER Y FORTALECER";
     const bgR=rgb.map(c=>Math.min(255,c+170));
     if (y>268) { doc.addPage(); drawHeader(false); y=20; }
     doc.setFillColor(...bgR); doc.roundedRect(MARGIN,y,CW,13,2,2,"F");
@@ -1762,7 +1833,7 @@ async function generarPDFDiag() {
     doc.text(`${oi+1}. ${b.titulo}`, MARGIN+8, y+5.5);
     doc.setFont("helvetica","normal"); doc.setFontSize(7.5);
     const svcRec = RECOMENDACIONES_DIAG[b.id]?.[nivel]?.servicios?.[0]||"";
-    doc.text(`[${prioridad}]${svcRec?" · "+svcRec:""}`, MARGIN+8, y+10.5);
+    doc.text(`[${prioridad}]${svcRec?"  "+svcRec:""}`, MARGIN+8, y+10.5);
     y+=15;
   });
 

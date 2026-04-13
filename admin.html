@@ -220,18 +220,17 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     <div class="selector-card">
       <label>🏢 Empresa:</label>
       <select id="selEmpresa"><option value="">-- Seleccione una empresa --</option></select>
-      <button class="btn-cargar" onclick="cargarDatos()">Cargar resultados</button>
+      <button class="btn-cargar" onclick="cargarDiagnosticosManual()" style="display:none"></button>
       <button class="btn-borrar-empresa" onclick="confirmarBorrarEmpresa()" title="Eliminar empresa y todos sus datos">🗑 Eliminar empresa</button>
     </div>
 
     <!-- TABS -->
     <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-      <button id="tabClima" onclick="cambiarTab('clima')" style="padding:10px 22px;border:none;border-radius:30px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;background:var(--verde);color:white;">📊 Clima Organizacional</button>
-      <button id="tabDiag" onclick="cambiarTab('diag')" style="padding:10px 22px;border:none;border-radius:30px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;background:#e0e0e0;color:#666;">🏭 Diagnósticos Empresariales</button>
+      <button id="tabDiag" style="padding:10px 22px;border:none;border-radius:30px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;background:var(--verde);color:white;">🏭 Diagnósticos Empresariales</button>
     </div>
 
     <!-- ══ TAB CLIMA ══ -->
-    <div id="secClima">
+    <div id="secClima" style="display:none">
     <div class="link-card">
       <span class="link-label">🔗 Enlace para encuesta:</span>
       <input type="text" id="linkEncuesta" readonly placeholder="Seleccione una empresa para generar el enlace">
@@ -287,7 +286,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
     </div><!-- /secClima -->
 
     <!-- ══ TAB DIAGNÓSTICOS ══ -->
-    <div id="secDiag" style="display:none">
+    <div id="secDiag">
       <div class="link-card" style="margin-bottom:20px">
         <span class="link-label">🔗 Enlace diagnóstico:</span>
         <input type="text" id="linkDiag" readonly placeholder="Seleccione una empresa">
@@ -356,10 +355,16 @@ function cambiarTab(tab) {
   document.getElementById('tabClima').style.color = esClima ? 'white' : '#666';
   document.getElementById('tabDiag').style.background = esClima ? '#e0e0e0' : 'var(--verde)';
   document.getElementById('tabDiag').style.color = esClima ? '#666' : 'white';
-  if (!esClima && empresaActual) cargarDiagnosticos(empresaActual);
-  if (!esClima && empresaActual) {
+  if (!esClima) {
+    // Generar link diagnóstico con la empresa seleccionada (del select)
+    const empActual = document.getElementById("selEmpresa").value;
     const base = window.location.href.replace(/\/[^/]*$/, '');
-    document.getElementById('linkDiag').value = `${base}/diagnostico_empresarial.html?empresa=${encodeURIComponent(empresaActual)}`;
+    if (empActual) {
+      document.getElementById('linkDiag').value = `${base}/diagnostico_empresarial.html?empresa=${encodeURIComponent(empActual)}`;
+      cargarDiagnosticos(empActual);
+    } else {
+      document.getElementById('linkDiag').value = '';
+    }
   }
 }
 
@@ -444,10 +449,14 @@ async function confirmarBorrarEmpresa() {
 }
 
 async function cargarEmpresas() {
-  const { data, error } = await supabaseClient
-    .from("respuestas_clima").select("empresa");
-  if (error) { console.error(error); return; }
-  const empresas = [...new Set(data.map(r => r.empresa))].sort();
+  // Buscar empresas en ambas tablas
+  const [r1, r2] = await Promise.all([
+    supabaseClient.from("respuestas_clima").select("empresa"),
+    supabaseClient.from("diagnosticos_empresariales").select("nombre_empresa")
+  ]);
+  const set1 = (r1.data || []).map(r => r.empresa).filter(Boolean);
+  const set2 = (r2.data || []).map(r => r.nombre_empresa).filter(Boolean);
+  const empresas = [...new Set([...set1, ...set2])].sort();
   const sel = document.getElementById("selEmpresa");
   sel.innerHTML = '<option value="">-- Seleccione una empresa --</option>';
   empresas.forEach(e => {
@@ -457,10 +466,11 @@ async function cargarEmpresas() {
   });
   sel.onchange = () => {
     const emp = sel.value;
-    const base = window.location.href.replace("admin.html","").replace(/\/$/, "");
-    document.getElementById("linkEncuesta").value = emp
-      ? `${base}/encuesta.html?empresa=${encodeURIComponent(emp)}`
+    const base = window.location.href.replace(/\/[^/]*$/, '');
+    document.getElementById("linkDiag").value = emp
+      ? `${base}/diagnostico_empresarial.html?empresa=${encodeURIComponent(emp)}`
       : "";
+    if (emp) cargarDiagnosticos(emp);
   };
 }
 
@@ -1263,18 +1273,32 @@ function calcularNivelDiag(diag, bloqueId) {
 }
 
 async function cargarDiagnosticos(empresa) {
+  console.log("🔍 Buscando diagnósticos para:", empresa);
+  empresaActual = empresa; // actualizar empresa actual para PDF/Excel
+
   const { data, error } = await supabaseClient
     .from("diagnosticos_empresariales")
     .select("*")
     .eq("nombre_empresa", empresa)
     .order("fecha", {ascending:false});
 
+  console.log("📊 Resultado:", data, "Error:", error);
+
   const diagWrap = document.getElementById("diagWrap");
   const diagNoData = document.getElementById("diagNoData");
 
-  if (error || !data || data.length === 0) {
+  if (error) {
+    console.error("❌ Error Supabase:", error);
     diagWrap.style.display = "none";
     diagNoData.style.display = "block";
+    diagNoData.textContent = "Error al cargar: " + error.message;
+    diagActuales = [];
+    return;
+  }
+  if (!data || data.length === 0) {
+    diagWrap.style.display = "none";
+    diagNoData.style.display = "block";
+    diagNoData.textContent = "No hay diagnósticos registrados para esta empresa.";
     diagActuales = [];
     return;
   }

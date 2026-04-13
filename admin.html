@@ -298,6 +298,32 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
           <h3>🏭 Diagnósticos Empresariales Registrados</h3>
           <div id="diagListado" style="overflow-x:auto"></div>
         </div>
+
+        <!-- GRÁFICAS EN PANTALLA -->
+        <div class="rec-card" id="diagChartSection" style="margin-top:20px">
+          <h3>📊 Resultados Visuales del Diagnóstico</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:16px">
+            <div style="background:#f8fcfa;border-radius:12px;padding:16px">
+              <h4 style="color:var(--verde);margin:0 0 12px 0;font-size:14px">Nivel Global por Área</h4>
+              <canvas id="chartDiagBarras" height="200"></canvas>
+            </div>
+            <div style="background:#f8fcfa;border-radius:12px;padding:16px">
+              <h4 style="color:var(--verde);margin:0 0 12px 0;font-size:14px">Distribución de Niveles</h4>
+              <canvas id="chartDiagDona" height="200"></canvas>
+            </div>
+          </div>
+          <div style="margin-top:20px">
+            <h4 style="color:var(--verde);margin:0 0 12px 0;font-size:14px">Perfil de Madurez Empresarial</h4>
+            <canvas id="chartDiagRadar" height="120"></canvas>
+          </div>
+        </div>
+
+        <!-- DETALLE VISUAL POR ÁREA -->
+        <div class="rec-card" id="diagDetalleSection" style="margin-top:20px">
+          <h3>🔍 Detalle por Área</h3>
+          <div id="diagDetalleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px"></div>
+        </div>
+        </div>
         <div style="text-align:center;margin-bottom:40px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
           <button class="btn-pdf" style="background:#1d6f42;box-shadow:0 6px 20px rgba(29,111,66,0.3)" onclick="descargarExcelDiag()">⬇ Descargar Excel Diagnósticos</button>
           <button class="btn-pdf" onclick="generarPDFDiag()">⬇ Descargar Informe PDF</button>
@@ -1306,6 +1332,8 @@ async function cargarDiagnosticos(empresa) {
   diagNoData.style.display = "none";
   diagWrap.style.display = "block";
   renderTablaDiag(data);
+  // Renderizar gráficas con el diagnóstico más reciente
+  setTimeout(() => renderGraficasDiag(data[0]), 100);
 }
 
 function renderTablaDiag(data) {
@@ -1334,111 +1362,420 @@ function renderTablaDiag(data) {
   cont.innerHTML=html;
 }
 
+// ── GRÁFICAS EN PANTALLA ─────────────────────────────────
+let chartDiagBarrasInst = null, chartDiagDonaInst = null, chartDiagRadarInst = null;
+
+function renderGraficasDiag(d) {
+  const PREGUNTAS_MAX = {
+    sst:{sst_1:3,sst_2:2,sst_3:2,sst_4:2,sst_5:2},
+    psico:{psico_1:3,psico_1b:2,psico_2:2,psico_3:3,psico_4:2,psico_5:2},
+    admin:{admin_1:3,admin_2:2,admin_3:2,admin_4:2},
+    gerencia:{ger_1:3,ger_2:2,ger_3:2},
+    legal:{leg_1:2,leg_2:2,leg_3:2,leg_4:2,leg_5:2},
+    clima:{cli_1:3,cli_1b:2,cli_2:3,cli_3:2},
+    capacitacion:{cap_1:3,cap_2:2,cap_3:3,cap_4:2},
+    talento:{tal_1:2,tal_2:2,tal_3:2,tal_4:2},
+  };
+  const labels = BLOQUES_DIAG.map(b => b.titulo.split(" ").slice(0,3).join(" "));
+  const valores = BLOQUES_DIAG.map(b => {
+    const mapa = PREGUNTAS_MAX[b.id];
+    if (!mapa) return 0;
+    let tot=0,mx=0;
+    Object.entries(mapa).forEach(([k,m])=>{mx+=m;tot+=(d[k]||0);});
+    return mx>0?Math.round(tot/mx*100):0;
+  });
+  const colores = BLOQUES_DIAG.map(b=>{
+    const n=calcularNivelDiag(d,b.id);
+    return n==="alto"?"#2e7d32":n==="medio"?"#f57f17":"#c62828";
+  });
+
+  if(chartDiagBarrasInst)chartDiagBarrasInst.destroy();
+  const ctxB=document.getElementById("chartDiagBarras").getContext("2d");
+  chartDiagBarrasInst=new Chart(ctxB,{type:"bar",data:{labels,datasets:[{label:"Nivel (%)",data:valores,backgroundColor:colores,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+"%"}}}}});
+
+  const nAlto=BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="alto").length;
+  const nMedio=BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="medio").length;
+  const nBasico=BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="basico").length;
+  if(chartDiagDonaInst)chartDiagDonaInst.destroy();
+  const ctxD=document.getElementById("chartDiagDona").getContext("2d");
+  chartDiagDonaInst=new Chart(ctxD,{type:"doughnut",data:{labels:["Alto","Medio","Básico"],datasets:[{data:[nAlto,nMedio,nBasico],backgroundColor:["#2e7d32","#f57f17","#c62828"],borderWidth:2}]},options:{responsive:true,plugins:{legend:{position:"bottom"}}}});
+
+  if(chartDiagRadarInst)chartDiagRadarInst.destroy();
+  const ctxR=document.getElementById("chartDiagRadar").getContext("2d");
+  chartDiagRadarInst=new Chart(ctxR,{type:"radar",data:{labels,datasets:[{label:"Nivel (%)",data:valores,backgroundColor:"rgba(0,104,71,0.15)",borderColor:"#006847",pointBackgroundColor:"#8DC63F",pointRadius:4}]},options:{responsive:true,scales:{r:{min:0,max:100,ticks:{stepSize:25,callback:v=>v+"%"}}},plugins:{legend:{display:false}}}});
+
+  const PREGUNTAS_DETALLE={
+    sst:[{k:"sst_1",lbl:"SG-SST",mx:3},{k:"sst_2",lbl:"COPASST",mx:2},{k:"sst_3",lbl:"Brigadas",mx:2},{k:"sst_4",lbl:"EPP",mx:2},{k:"sst_5",lbl:"Accid.",mx:2}],
+    psico:[{k:"psico_1",lbl:"Batería",mx:3},{k:"psico_1b",lbl:"Com.Conv.",mx:2},{k:"psico_2",lbl:"Protocolos",mx:2},{k:"psico_3",lbl:"Carga",mx:3},{k:"psico_4",lbl:"Liderazgo",mx:2},{k:"psico_5",lbl:"Clima Emoc.",mx:2}],
+    admin:[{k:"admin_1",lbl:"Contabilidad",mx:3},{k:"admin_2",lbl:"Indicadores",mx:2},{k:"admin_3",lbl:"Presupuesto",mx:2},{k:"admin_4",lbl:"Nómina",mx:2}],
+    gerencia:[{k:"ger_1",lbl:"Planeación",mx:3},{k:"ger_2",lbl:"Estructura",mx:2},{k:"ger_3",lbl:"Decisiones",mx:2}],
+    legal:[{k:"leg_1",lbl:"Contratación",mx:2},{k:"leg_2",lbl:"Reforma",mx:2},{k:"leg_3",lbl:"Desconexión",mx:2},{k:"leg_4",lbl:"Acoso",mx:2},{k:"leg_5",lbl:"Nómina Legal",mx:2}],
+    clima:[{k:"cli_1",lbl:"Medición",mx:3},{k:"cli_1b",lbl:"Bienestar",mx:2},{k:"cli_2",lbl:"Comunicación",mx:3},{k:"cli_3",lbl:"Reconocim.",mx:2}],
+    capacitacion:[{k:"cap_1",lbl:"Plan Form.",mx:3},{k:"cap_2",lbl:"Presupuesto",mx:2},{k:"cap_3",lbl:"Rutas",mx:3},{k:"cap_4",lbl:"Evaluación",mx:2}],
+    talento:[{k:"tal_1",lbl:"Selección",mx:2},{k:"tal_2",lbl:"Inducción",mx:2},{k:"tal_3",lbl:"Desempeño",mx:2},{k:"tal_4",lbl:"Retención",mx:2}],
+  };
+  const grid=document.getElementById("diagDetalleGrid");
+  let detalleHTML="";
+  BLOQUES_DIAG.forEach((b,bi)=>{
+    const nivel=calcularNivelDiag(d,b.id);
+    const color=nivel==="alto"?"#2e7d32":nivel==="medio"?"#f57f17":"#c62828";
+    const bgColor=nivel==="alto"?"#e8f5e9":nivel==="medio"?"#fff8e1":"#fce4ec";
+    detalleHTML+=`<div style="background:${bgColor};border-radius:12px;padding:14px;border-left:4px solid ${color}"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><strong style="color:${color};font-size:13px">${b.titulo}</strong><span style="background:${color};color:white;padding:2px 10px;border-radius:20px;font-size:11px;font-weight:700">${nivelLabel(nivel)} · ${valores[bi]}%</span></div><canvas id="chartArea_${b.id}" height="100"></canvas></div>`;
+  });
+  grid.innerHTML=detalleHTML;
+  BLOQUES_DIAG.forEach((b,bi)=>{
+    const pregs=PREGUNTAS_DETALLE[b.id]||[];
+    const pLabels=pregs.map(p=>p.lbl);
+    const pVals=pregs.map(p=>p.mx>0?Math.round((d[p.k]||0)/p.mx*100):0);
+    const nivel=calcularNivelDiag(d,b.id);
+    const color=nivel==="alto"?"#2e7d32":nivel==="medio"?"#f57f17":"#c62828";
+    const ctx=document.getElementById(`chartArea_${b.id}`);
+    if(!ctx)return;
+    new Chart(ctx.getContext("2d"),{type:"bar",data:{labels:pLabels,datasets:[{data:pVals,backgroundColor:color+"99",borderColor:color,borderWidth:1.5,borderRadius:4}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:100,ticks:{callback:v=>v+"%",font:{size:9}}}}}});
+  });
+}
+
 // ─── PDF DIAGNÓSTICO ────────────────────────────────────────
-function generarPDFDiag() {
+async function generarPDFDiag() {
   if (!diagActuales || diagActuales.length === 0) { alert("No hay diagnósticos para generar."); return; }
-  const d = diagActuales[0]; // Más reciente
+  const d = diagActuales[0];
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
   const W=210, MARGIN=14, CW=W-MARGIN*2;
-  const VERDE=[0,104,71], VERDE_PIST=[141,198,63], GRIS=[58,58,58];
-  let y=0;
+  const VERDE=[0,104,71], VERDE_PIST=[141,198,63], GRIS=[58,58,58], BLANCO=[255,255,255];
+  const NARANJA=[245,127,23], ROJO=[198,40,40], VERDE_ALTO=[46,125,50];
 
-  // Header
-  doc.setFillColor(...VERDE); doc.rect(0,0,W,28,"F");
-  doc.setFillColor(...VERDE_PIST); doc.rect(0,26,W,2,"F");
-  doc.setTextColor(255,255,255);
-  doc.setFont("helvetica","bold"); doc.setFontSize(13);
-  doc.text("DIAGNÓSTICO EMPRESARIAL INTEGRAL",W/2,11,{align:"center"});
-  doc.setFont("helvetica","normal"); doc.setFontSize(9);
-  doc.text("Agencia de Empleo y Emprendimiento · Comfenalco Antioquia",W/2,18,{align:"center"});
-  doc.text(`Fecha: ${(d.fecha||"").slice(0,10)}`,W/2,23,{align:"center"});
-  y=34;
+  // ── Logos desde el DOM
+  const imgEls = document.querySelectorAll("header img");
+  const logo1Src = imgEls[0]?.src || null;
+  const logo2Src = imgEls[1]?.src || null;
 
-  // Datos empresa
-  doc.setFillColor(232,244,239);
-  doc.roundedRect(MARGIN,y,CW,38,3,3,"F");
-  doc.setTextColor(...VERDE); doc.setFont("helvetica","bold"); doc.setFontSize(10);
-  doc.text("DATOS DE LA EMPRESA",MARGIN+5,y+7);
-  doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
-  doc.text(`Empresa: ${d.nombre_empresa||empresaActual}`,MARGIN+5,y+14);
-  doc.text(`NIT: ${d.nit||""}`,MARGIN+5,y+20);
-  doc.text(`Municipio: ${d.municipio||""} - ${d.dpto||""}`,MARGIN+5,y+26);
-  doc.text(`Dirección: ${d.direccion||""}`,MARGIN+5,y+32);
-  doc.text(`Responsable: ${d.persona||""} | ${d.cargo||""}`,MARGIN+CW/2+5,y+14);
-  doc.text(`Doc: ${d.tipo_doc||""} ${d.num_doc||""}`,MARGIN+CW/2+5,y+20);
-  doc.text(`Tiempo en empresa: ${d.tiempo||""}`,MARGIN+CW/2+5,y+26);
-  y+=44;
+  // ── Capturar gráficas existentes como imágenes
+  async function canvasToDataURL(canvasId) {
+    return new Promise(resolve => {
+      const el = document.getElementById(canvasId);
+      if (!el) { resolve(null); return; }
+      // Pequeño delay para asegurar render
+      setTimeout(() => {
+        try { resolve(el.toDataURL("image/png")); }
+        catch(e) { resolve(null); }
+      }, 100);
+    });
+  }
 
-  // Resumen niveles
-  doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...VERDE);
-  doc.text("RESUMEN DE NIVELES POR ÁREA",MARGIN,y); y+=6;
-  const colW=CW/4;
-  BLOQUES_DIAG.forEach((bloque,i)=>{
-    const col=i%4;
-    if(col===0&&i>0) y+=22;
-    const nivel=calcularNivelDiag(d,bloque.id);
-    const rgb=nivelColor(nivel);
-    const x=MARGIN+col*colW;
-    doc.setFillColor(...rgb.map(c=>Math.min(255,c+155)));
-    doc.roundedRect(x,y,colW-3,18,2,2,"F");
-    doc.setFillColor(...rgb);
-    doc.roundedRect(x,y,colW-3,4,1,1,"F");
-    doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(6.5);
-    doc.text(nivelLabel(nivel).toUpperCase(),x+(colW-3)/2,y+3,{align:"center"});
-    doc.setTextColor(...rgb); doc.setFont("helvetica","normal"); doc.setFontSize(6);
-    const lineas=doc.splitTextToSize(bloque.titulo,colW-7);
-    lineas.slice(0,2).forEach((l,li)=>doc.text(l,x+(colW-3)/2,y+8+li*4,{align:"center"}));
+  const imgBarras = await canvasToDataURL("chartDiagBarras");
+  const imgDona   = await canvasToDataURL("chartDiagDona");
+  const imgRadar  = await canvasToDataURL("chartDiagRadar");
+  const imgAreas  = {};
+  for (const b of BLOQUES_DIAG) {
+    imgAreas[b.id] = await canvasToDataURL(`chartArea_${b.id}`);
+  }
+
+  // ── PREGUNTAS_MAX (reutilizado)
+  const PREGUNTAS_MAX = {
+    sst:{sst_1:3,sst_2:2,sst_3:2,sst_4:2,sst_5:2},
+    psico:{psico_1:3,psico_1b:2,psico_2:2,psico_3:3,psico_4:2,psico_5:2},
+    admin:{admin_1:3,admin_2:2,admin_3:2,admin_4:2},
+    gerencia:{ger_1:3,ger_2:2,ger_3:2},
+    legal:{leg_1:2,leg_2:2,leg_3:2,leg_4:2,leg_5:2},
+    clima:{cli_1:3,cli_1b:2,cli_2:3,cli_3:2},
+    capacitacion:{cap_1:3,cap_2:2,cap_3:3,cap_4:2},
+    talento:{tal_1:2,tal_2:2,tal_3:2,tal_4:2},
+  };
+  const valores = BLOQUES_DIAG.map(b => {
+    const mapa = PREGUNTAS_MAX[b.id]; if (!mapa) return 0;
+    let tot=0,mx=0;
+    Object.entries(mapa).forEach(([k,m])=>{mx+=m;tot+=(d[k]||0);});
+    return mx>0?tot/mx:0;
   });
-  y+=26;
 
-  // Recomendaciones
-  doc.setFont("helvetica","bold"); doc.setFontSize(10); doc.setTextColor(...VERDE);
-  doc.text("RECOMENDACIONES POR ÁREA",MARGIN,y); y+=6;
-
-  BLOQUES_DIAG.forEach(bloque=>{
-    const nivel=calcularNivelDiag(d,bloque.id);
-    const rec=RECOMENDACIONES_DIAG[bloque.id]?.[nivel];
-    if(!rec) return;
-    const rgb=nivelColor(nivel);
-    const textLines=doc.splitTextToSize(rec.texto,CW-14);
-    const svcLines=doc.splitTextToSize("Servicios Comfenalco: "+rec.servicios.join(" · "),CW-14);
-    const blockH=10+textLines.length*4+3+svcLines.length*3.8+4;
-    if(y+blockH>275){
-      doc.addPage();
-      doc.setFillColor(255,255,255);doc.rect(0,0,W,8,"F");
-      doc.setFillColor(...VERDE_PIST);doc.rect(0,7,W,1,"F");
-      doc.setFillColor(...VERDE);doc.rect(0,8,W,5,"F");
-      y=18;
+  // ── Helper: dibujar header en cada página
+  function drawHeader(isFirst) {
+    doc.setFillColor(...VERDE); doc.rect(0,0,W,isFirst?36:14,"F");
+    doc.setFillColor(...VERDE_PIST); doc.rect(0,isFirst?34:13,W,2,"F");
+    try {
+      if (logo1Src) doc.addImage(logo1Src,"JPEG",MARGIN, isFirst?5:1.5, 46, isFirst?22:10);
+      if (logo2Src) doc.addImage(logo2Src,"PNG",  W-MARGIN-38, isFirst?6:1.5, 38, isFirst?20:10);
+    } catch(e){}
+    if (isFirst) {
+      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(12);
+      doc.text("DIAGNÓSTICO EMPRESARIAL INTEGRAL", W/2, 15, {align:"center"});
+      doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+      doc.text("Agencia de Empleo y Emprendimiento · Comfenalco Antioquia", W/2, 21.5, {align:"center"});
+      doc.setFontSize(7.5);
+      doc.text(`Generado: ${new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"})}`, W/2, 27, {align:"center"});
+    } else {
+      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
+      doc.text("DIAGNÓSTICO EMPRESARIAL · " + (d.nombre_empresa||empresaActual).toUpperCase(), MARGIN+50, 9);
     }
-    doc.setFillColor(...rgb.map(c=>Math.min(255,c+165)));
-    doc.roundedRect(MARGIN,y,CW,blockH,2,2,"F");
-    doc.setFillColor(...rgb);
-    doc.roundedRect(MARGIN,y,4,blockH,1,1,"F");
-    doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(9);
-    doc.text(`${bloque.titulo}  ·  Nivel: ${nivelLabel(nivel)}`,MARGIN+7,y+7);
-    doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(...GRIS);
-    doc.text(textLines,MARGIN+7,y+13);
-    let yc=y+13+textLines.length*4+2;
-    doc.setFillColor(...VERDE);
-    doc.roundedRect(MARGIN+5,yc-2,CW-10,svcLines.length*3.8+4,2,2,"F");
-    doc.setTextColor(255,255,255); doc.setFont("helvetica","bold"); doc.setFontSize(7);
-    doc.text(svcLines,MARGIN+8,yc+2);
-    y+=blockH+5;
-  });
+  }
 
-  // Footer en todas las páginas
-  const totalPags=doc.getNumberOfPages();
-  for(let i=1;i<=totalPags;i++){
-    doc.setPage(i);
+  // ── Helper: footer
+  function drawFooter(pageNum, totalPages) {
     doc.setFillColor(232,244,239); doc.rect(0,285,W,12,"F");
     doc.setDrawColor(...VERDE_PIST); doc.setLineWidth(0.3); doc.line(0,285,W,285);
     doc.setTextColor(...VERDE); doc.setFont("helvetica","normal"); doc.setFontSize(7);
-    doc.text("Comfenalco Antioquia · Agencia de Empleo y Emprendimiento",MARGIN,292);
-    doc.text(`Página ${i} de ${totalPags}`,W-MARGIN,292,{align:"right"});
+    doc.text("Comfenalco Antioquia · Agencia de Empleo y Emprendimiento · Servicio Público de Empleo", MARGIN, 292);
+    doc.text(`Pág. ${pageNum} de ${totalPages}`, W-MARGIN, 292, {align:"right"});
   }
-  doc.save(`DiagnosticoEmpresarial_${empresaActual.replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`);
+
+  // ── Helper: sección título
+  function sectionTitle(txt, y) {
+    doc.setFillColor(...VERDE); doc.roundedRect(MARGIN,y,CW,9,2,2,"F");
+    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(10);
+    doc.text(txt, MARGIN+6, y+6.2);
+    return y+13;
+  }
+
+  let y = 0;
+  // ═══════════════════════════════════════════
+  // PÁGINA 1 — PORTADA + DATOS + RESUMEN
+  // ═══════════════════════════════════════════
+  drawHeader(true);
+  y = 42;
+
+  // Datos empresa
+  doc.setFillColor(232,244,239); doc.roundedRect(MARGIN,y,CW,46,3,3,"F");
+  doc.setFillColor(...VERDE); doc.roundedRect(MARGIN,y,5,46,2,2,"F");
+  doc.setTextColor(...VERDE); doc.setFont("helvetica","bold"); doc.setFontSize(10);
+  doc.text("INFORMACIÓN DE LA EMPRESA", MARGIN+9, y+8);
+  doc.setFont("helvetica","normal"); doc.setFontSize(8.5); doc.setTextColor(...GRIS);
+  const col2 = MARGIN+CW/2+4;
+  doc.text(`Empresa: ${d.nombre_empresa||empresaActual}`, MARGIN+9, y+16);
+  doc.text(`NIT: ${d.nit||""}`, MARGIN+9, y+23);
+  doc.text(`Municipio: ${d.municipio||""} · ${d.dpto||""}`, MARGIN+9, y+30);
+  doc.text(`Dirección: ${d.direccion||""}`, MARGIN+9, y+37);
+  doc.text(`Responsable: ${d.persona||""} · ${d.cargo||""}`, col2, y+16);
+  doc.text(`Doc.: ${d.tipo_doc||""} ${d.num_doc||""}`, col2, y+23);
+  doc.text(`Tiempo en empresa: ${d.tiempo||""}`, col2, y+30);
+  doc.text(`Fecha diagnóstico: ${(d.fecha||"").slice(0,10)}`, col2, y+37);
+  y += 51;
+
+  // Resultados síntesis — tarjetas 4x2
+  y = sectionTitle("📊 RESULTADOS POR ÁREA — VISTA GENERAL", y);
+  const colW4 = CW/4;
+  BLOQUES_DIAG.forEach((bloque,i)=>{
+    const col = i%4;
+    if (col===0 && i>0) y+=26;
+    const nivel = calcularNivelDiag(d,bloque.id);
+    const pct = valores[i];
+    const rgb = nivel==="alto"?VERDE_ALTO:nivel==="medio"?NARANJA:ROJO;
+    const bgR = rgb.map(c=>Math.min(255,c+170));
+    const x = MARGIN+col*colW4;
+    doc.setFillColor(...bgR); doc.roundedRect(x,y,colW4-3,22,2,2,"F");
+    doc.setFillColor(...rgb); doc.roundedRect(x,y,colW4-3,5,1,1,"F");
+    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(6.5);
+    doc.text(`${nivelLabel(nivel).toUpperCase()} ${Math.round(pct*100)}%`, x+(colW4-3)/2, y+3.8, {align:"center"});
+    doc.setTextColor(...rgb); doc.setFont("helvetica","normal"); doc.setFontSize(5.8);
+    const lineas = doc.splitTextToSize(bloque.titulo, colW4-7);
+    lineas.slice(0,2).forEach((l,li)=>doc.text(l, x+(colW4-3)/2, y+10+li*4.5, {align:"center"}));
+  });
+  y += 29;
+
+  // Gráfica barras general (desde canvas)
+  if (imgBarras) {
+    y = sectionTitle("📈 NIVEL (%) POR ÁREA", y);
+    doc.addImage(imgBarras,"PNG",MARGIN,y,CW,55);
+    y += 59;
+  }
+
+  // Gráfica dona + radar en fila
+  if (imgDona || imgRadar) {
+    y = sectionTitle("🎯 DISTRIBUCIÓN DE NIVELES & PERFIL DE MADUREZ", y);
+    if (imgDona)  doc.addImage(imgDona,"PNG",  MARGIN,        y, CW/2-4, 55);
+    if (imgRadar) doc.addImage(imgRadar,"PNG", MARGIN+CW/2+4, y, CW/2-4, 55);
+    y += 59;
+  }
+
+  drawFooter(1, "...");
+
+  // ═══════════════════════════════════════════
+  // PÁGINAS 2+ — UNA PÁGINA POR ÁREA
+  // ═══════════════════════════════════════════
+  const PREGUNTAS_DETALLE = {
+    sst:[{k:"sst_1",lbl:"Sistema SG-SST",mx:3},{k:"sst_2",lbl:"COPASST",mx:2},{k:"sst_3",lbl:"Brigadas",mx:2},{k:"sst_4",lbl:"EPP",mx:2},{k:"sst_5",lbl:"Accidentalidad",mx:2}],
+    psico:[{k:"psico_1",lbl:"Batería Psicosocial",mx:3},{k:"psico_1b",lbl:"Com.Convivencia",mx:2},{k:"psico_2",lbl:"Protocolos",mx:2},{k:"psico_3",lbl:"Carga laboral",mx:3},{k:"psico_4",lbl:"Estilos liderazgo",mx:2},{k:"psico_5",lbl:"Clima emocional",mx:2}],
+    admin:[{k:"admin_1",lbl:"Contabilidad",mx:3},{k:"admin_2",lbl:"Indicadores",mx:2},{k:"admin_3",lbl:"Presupuesto",mx:2},{k:"admin_4",lbl:"Nómina",mx:2}],
+    gerencia:[{k:"ger_1",lbl:"Planeación estratégica",mx:3},{k:"ger_2",lbl:"Estructura organizacional",mx:2},{k:"ger_3",lbl:"Toma de decisiones",mx:2}],
+    legal:[{k:"leg_1",lbl:"Contratación laboral",mx:2},{k:"leg_2",lbl:"Reforma Laboral",mx:2},{k:"leg_3",lbl:"Desconexión digital",mx:2},{k:"leg_4",lbl:"Acoso laboral",mx:2},{k:"leg_5",lbl:"Nómina legal",mx:2}],
+    clima:[{k:"cli_1",lbl:"Medición de clima",mx:3},{k:"cli_1b",lbl:"Plan bienestar",mx:2},{k:"cli_2",lbl:"Comunicación interna",mx:3},{k:"cli_3",lbl:"Reconocimiento",mx:2}],
+    capacitacion:[{k:"cap_1",lbl:"Plan de formación",mx:3},{k:"cap_2",lbl:"Presupuesto formación",mx:2},{k:"cap_3",lbl:"Rutas de carrera",mx:3},{k:"cap_4",lbl:"Evaluación impacto",mx:2}],
+    talento:[{k:"tal_1",lbl:"Proceso de selección",mx:2},{k:"tal_2",lbl:"Inducción",mx:2},{k:"tal_3",lbl:"Evaluación desempeño",mx:2},{k:"tal_4",lbl:"Retención de talento",mx:2}],
+  };
+
+  for (let bi=0; bi<BLOQUES_DIAG.length; bi++) {
+    const bloque = BLOQUES_DIAG[bi];
+    const nivel  = calcularNivelDiag(d, bloque.id);
+    const rgb    = nivel==="alto"?VERDE_ALTO:nivel==="medio"?NARANJA:ROJO;
+    const bgR    = rgb.map(c=>Math.min(255,c+170));
+    const pct    = valores[bi];
+    const rec    = RECOMENDACIONES_DIAG[bloque.id]?.[nivel];
+    const pregs  = PREGUNTAS_DETALLE[bloque.id]||[];
+    const imgArea= imgAreas[bloque.id];
+
+    doc.addPage();
+    drawHeader(false);
+    y = 20;
+
+    // ── Título del área
+    doc.setFillColor(...bgR); doc.roundedRect(MARGIN,y,CW,14,3,3,"F");
+    doc.setFillColor(...rgb); doc.roundedRect(MARGIN,y,6,14,2,2,"F");
+    doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(12);
+    doc.text(bloque.titulo.toUpperCase(), MARGIN+10, y+6);
+    doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+    doc.text(`Nivel: ${nivelLabel(nivel)} · Puntaje global: ${Math.round(pct*100)}%`, MARGIN+10, y+12);
+    y += 19;
+
+    // ── Gráfica del área (canvas capturado)
+    if (imgArea) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...GRIS);
+      doc.text("Resultados por componente:", MARGIN, y+4);
+      doc.addImage(imgArea,"PNG", MARGIN, y+6, CW*0.62, 52);
+    }
+
+    // ── Indicadores detalle (tabla compacta derecha)
+    const tX = MARGIN + CW*0.65;
+    const tW = CW - CW*0.65;
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
+    doc.text("Componentes:", tX, y+4);
+    let ty = y+9;
+    pregs.forEach((p,pi)=>{
+      const val = d[p.k]||0;
+      const pPct = p.mx>0? val/p.mx : 0;
+      const bgp = pPct>=0.7?[200,239,200]:pPct>=0.4?[255,243,187]:[252,208,215];
+      const fgp = pPct>=0.7?VERDE_ALTO:pPct>=0.4?NARANJA:ROJO;
+      doc.setFillColor(...bgp); doc.roundedRect(tX, ty, tW-2, 7, 1,1,"F");
+      doc.setTextColor(...fgp); doc.setFont("helvetica","normal"); doc.setFontSize(6.5);
+      doc.text(p.lbl, tX+2, ty+4.5);
+      doc.setFont("helvetica","bold");
+      doc.text(`${val}/${p.mx}`, tX+tW-8, ty+4.5);
+      ty += 8.5;
+    });
+    y += 62;
+
+    // ── Análisis de nivel
+    const nivelTexto = nivel==="alto"?"✅ FORTALEZA":nivel==="medio"?"⚠️ EN DESARROLLO":"🔴 ÁREA CRÍTICA";
+    doc.setFillColor(...rgb.map(c=>Math.min(255,c+170)));
+    doc.roundedRect(MARGIN, y, CW, 8, 2,2,"F");
+    doc.setFillColor(...rgb); doc.roundedRect(MARGIN,y,5,8,1,1,"F");
+    doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(9);
+    doc.text(`${nivelTexto} · ${bloque.titulo}`, MARGIN+8, y+5.5);
+    y += 12;
+
+    // ── Texto diagnóstico
+    if (rec?.texto) {
+      doc.setFillColor(248,252,250); doc.roundedRect(MARGIN, y, CW, 18, 2,2,"F");
+      doc.setTextColor(...GRIS); doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+      const lineas = doc.splitTextToSize(rec.texto, CW-8);
+      lineas.slice(0,3).forEach((l,li) => doc.text(l, MARGIN+4, y+6+li*5.5));
+      y += 22;
+    }
+
+    // ── Servicios recomendados
+    if (rec?.servicios?.length) {
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...VERDE);
+      doc.text("💼 SERVICIOS RECOMENDADOS", MARGIN, y+4);
+      y += 9;
+      const svcH = rec.servicios.length * 9 + 6;
+      doc.setFillColor(232,244,239); doc.roundedRect(MARGIN, y, CW, svcH, 2,2,"F");
+      rec.servicios.forEach((svc,si)=>{
+        doc.setFillColor(...VERDE_PIST); doc.circle(MARGIN+5, y+4+si*9+1, 1.2, "F");
+        doc.setTextColor(...GRIS); doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+        doc.text(svc, MARGIN+9, y+4+si*9+1.5);
+      });
+      y += svcH + 5;
+    }
+
+    // ── Medidor visual de nivel
+    y += 4;
+    const barY = Math.min(y, 255);
+    const barW_total = CW;
+    doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
+    doc.text("Nivel de madurez en esta área:", MARGIN, barY);
+    doc.setFillColor(220,220,220); doc.roundedRect(MARGIN, barY+3, barW_total, 7, 2,2,"F");
+    doc.setFillColor(...rgb); doc.roundedRect(MARGIN, barY+3, barW_total*pct, 7, 2,2,"F");
+    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(7);
+    if (pct > 0.15) doc.text(`${Math.round(pct*100)}%`, MARGIN+barW_total*pct/2, barY+8, {align:"center"});
+
+    drawFooter(bi+2, BLOQUES_DIAG.length+2);
+  }
+
+  // ═══════════════════════════════════════════
+  // ÚLTIMA PÁGINA — RESUMEN EJECUTIVO
+  // ═══════════════════════════════════════════
+  doc.addPage();
+  drawHeader(false);
+  y = 20;
+
+  y = sectionTitle("📋 RESUMEN EJECUTIVO Y PLAN DE ACCIÓN", y);
+
+  const altos   = BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="alto");
+  const medios  = BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="medio");
+  const basicos = BLOQUES_DIAG.filter(b=>calcularNivelDiag(d,b.id)==="basico");
+  const globalPct = Math.round(valores.reduce((a,b)=>a+b,0)/valores.length*100);
+
+  // Score global
+  const scoreColor = globalPct>=70?VERDE_ALTO:globalPct>=40?NARANJA:ROJO;
+  doc.setFillColor(...scoreColor.map(c=>Math.min(255,c+160)));
+  doc.roundedRect(MARGIN,y,CW,22,3,3,"F");
+  doc.setFillColor(...scoreColor); doc.roundedRect(MARGIN,y,6,22,2,2,"F");
+  doc.setTextColor(...scoreColor); doc.setFont("helvetica","bold"); doc.setFontSize(16);
+  doc.text(`${globalPct}%`, MARGIN+20, y+14, {align:"center"});
+  doc.setFontSize(9);
+  doc.text("PUNTAJE GLOBAL", MARGIN+20, y+19, {align:"center"});
+  doc.setFont("helvetica","normal"); doc.setFontSize(8.5);
+  doc.setTextColor(...GRIS);
+  const globalTxt = globalPct>=70?"La empresa presenta un nivel alto de madurez organizacional en la mayoría de las áreas evaluadas.":
+    globalPct>=40?"La empresa está en proceso de consolidación. Existen áreas de oportunidad importantes a trabajar.":
+    "Se identifican brechas críticas en múltiples áreas que requieren atención prioritaria e intervención inmediata.";
+  const gl = doc.splitTextToSize(globalTxt, CW-38);
+  gl.forEach((l,li)=>doc.text(l, MARGIN+38, y+8+li*5.5));
+  y += 27;
+
+  // Fortalezas / Oportunidades / Críticos
+  const cols3 = CW/3-2;
+  [[altos,"✅ FORTALEZAS",VERDE_ALTO],[medios,"⚙️ EN DESARROLLO",NARANJA],[basicos,"🔴 ÁREAS CRÍTICAS",ROJO]].forEach(([arr,titulo,rgb3],ci)=>{
+    const x3 = MARGIN+ci*(cols3+3);
+    const h3 = Math.max(arr.length*8+14, 30);
+    doc.setFillColor(...rgb3.map(c=>Math.min(255,c+165))); doc.roundedRect(x3,y,cols3,h3,2,2,"F");
+    doc.setFillColor(...rgb3); doc.roundedRect(x3,y,cols3,7,2,2,"F");
+    doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(6.5);
+    doc.text(titulo, x3+cols3/2, y+4.8, {align:"center"});
+    doc.setTextColor(...rgb3); doc.setFont("helvetica","normal"); doc.setFontSize(7);
+    if (arr.length===0) doc.text("—", x3+cols3/2, y+12, {align:"center"});
+    arr.forEach((b,bi)=>doc.text("• "+b.titulo, x3+3, y+12+bi*8));
+  });
+  y += Math.max(altos.length,medios.length,basicos.length)*8+18;
+
+  // Plan de acción priorizado
+  y = sectionTitle("🗓️ PLAN DE ACCIÓN PRIORIZADO", y);
+  const orden = [...basicos,...medios,...altos];
+  orden.forEach((b,oi)=>{
+    const nivel=calcularNivelDiag(d,b.id);
+    const rgb=nivel==="alto"?VERDE_ALTO:nivel==="medio"?NARANJA:ROJO;
+    const prioridad=nivel==="basico"?"PRIORIDAD ALTA":nivel==="medio"?"PRIORIDAD MEDIA":"MANTENER";
+    const bgR=rgb.map(c=>Math.min(255,c+170));
+    if (y>268) { doc.addPage(); drawHeader(false); y=20; }
+    doc.setFillColor(...bgR); doc.roundedRect(MARGIN,y,CW,13,2,2,"F");
+    doc.setFillColor(...rgb); doc.roundedRect(MARGIN,y,5,13,1,1,"F");
+    doc.setTextColor(...rgb); doc.setFont("helvetica","bold"); doc.setFontSize(8.5);
+    doc.text(`${oi+1}. ${b.titulo}`, MARGIN+8, y+5.5);
+    doc.setFont("helvetica","normal"); doc.setFontSize(7.5);
+    const svcRec = RECOMENDACIONES_DIAG[b.id]?.[nivel]?.servicios?.[0]||"";
+    doc.text(`[${prioridad}]${svcRec?" · "+svcRec:""}`, MARGIN+8, y+10.5);
+    y+=15;
+  });
+
+  // Footer en todas las páginas
+  const totalPags = doc.getNumberOfPages();
+  for (let p=1;p<=totalPags;p++) {
+    doc.setPage(p);
+    drawFooter(p, totalPags);
+  }
+
+  doc.save(`DiagnosticoEmpresarial_${(d.nombre_empresa||empresaActual).replace(/\s/g,"_")}_${new Date().toISOString().slice(0,10)}.pdf`);
 }
+
 
 // ─── EXCEL DIAGNÓSTICO ──────────────────────────────────────
 function descargarExcelDiag() {

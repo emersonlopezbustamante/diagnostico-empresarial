@@ -15,10 +15,10 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 </script>
 <style>
   :root {
-    --verde: #006847; --verde-pistacho: #8DC63F; --verde-claro: #e8f4ef; --verde-oscuro: #004d34;
+    --verde: #094a4b; --verde-pistacho: #8DC63F; --verde-claro: #e8f4ef; --verde-oscuro: #073536;
     --rojo: #C8102E; --dorado: #F2A900; --dorado-claro: #fff8e1;
     --gris: #3a3a3a; --gris-claro: #f5f7f5; --blanco: #fff;
-    --sombra: 0 4px 24px rgba(0,104,71,0.10);
+    --sombra: 0 4px 24px rgba(9,74,75,0.10);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Source Sans 3', sans-serif; background: var(--gris-claro); color: var(--gris); }
@@ -53,17 +53,17 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   #mainWrap { display: none; }
 
   header {
-    background: linear-gradient(135deg, #ffffff 0%, #e8f4ef 40%, #006847 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #e8f4ef 40%, #094a4b 100%);
     padding: 14px 32px;
     display: flex; align-items: center; justify-content: space-between;
-    box-shadow: 0 2px 12px rgba(0,104,71,0.15);
+    box-shadow: 0 2px 12px rgba(9,74,75,0.15);
     border-bottom: 3px solid #8DC63F;
   }
-  .header-left { display: flex; align-items: center; gap: 12px; color: #006847; }
+  .header-left { display: flex; align-items: center; gap: 12px; color: #094a4b; }
   .h-logo { width: 44px; height: 44px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--verde); font-size: 16px; border: 2px solid var(--dorado); }
-  .h-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #006847; font-weight: 700; }
+  .h-title { font-family: 'Playfair Display', serif; font-size: 17px; color: #094a4b; font-weight: 700; }
   .h-sub { font-size: 11px; color: #555; }
-  .btn-logout { background: #006847; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: inherit; transition: background 0.2s; }
+  .btn-logout { background: #094a4b; color: white; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; font-family: inherit; transition: background 0.2s; }
   .btn-logout:hover { background: #005538; }
 
   .main-content { max-width: 1100px; margin: 0 auto; padding: 32px 20px; }
@@ -608,8 +608,8 @@ function renderDashboard(data) {
       datasets: [{
         label: "% Satisfacción",
         data: promedios.map(d => d.pct),
-        borderColor: "#006847",
-        backgroundColor: "rgba(0,104,71,0.15)",
+        borderColor: "#094a4b",
+        backgroundColor: "rgba(9,74,75,0.15)",
         pointBackgroundColor: colores,
         pointRadius: 5, borderWidth: 2
       }]
@@ -1103,7 +1103,7 @@ async function generarPDF() {
 
     // Capacitaciones block
     let yc = y + 13 + recLines.length*4.2 + 2;
-    doc.setFillColor(0,104,71);
+    doc.setFillColor(9,74,75);
     doc.roundedRect(MARGIN+5, yc-2, CW-10, capLines.length*3.8 + contactLine.length*3.8 + 5, 2, 2, "F");
     doc.setTextColor(255,255,255);
     doc.setFont("helvetica","bold");
@@ -1140,7 +1140,7 @@ async function generarPDF() {
     doc.setDrawColor(...VERDE_PIST);
     doc.setLineWidth(0.3);
     doc.line(0,285,W,285);
-    doc.setTextColor(0,104,71);
+    doc.setTextColor(9,74,75);
     doc.setFont("helvetica","normal");
     doc.setFontSize(7.5);
     doc.text("Comfenalco Antioquia · Agencia de Empleo y Emprendimiento · Servicio Público de Empleo", MARGIN, 292);
@@ -1456,7 +1456,7 @@ function renderGraficasDiag(d) {
 
   if(chartDiagRadarInst)chartDiagRadarInst.destroy();
   const ctxR=document.getElementById("chartDiagRadar").getContext("2d");
-  chartDiagRadarInst=new Chart(ctxR,{type:"radar",data:{labels,datasets:[{label:"Nivel (%)",data:valores,backgroundColor:"rgba(0,104,71,0.12)",borderColor:"#006847",borderWidth:2,pointBackgroundColor:"#8DC63F",pointBorderColor:"#006847",pointRadius:5,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:25,callback:v=>v+"%",font:{size:10},backdropColor:"transparent"},pointLabels:{font:{size:11},color:"#333"},grid:{color:"rgba(0,104,71,0.15)"},angleLines:{color:"rgba(0,104,71,0.15)"}}},plugins:{legend:{display:false}}}});
+  chartDiagRadarInst=new Chart(ctxR,{type:"radar",data:{labels,datasets:[{label:"Nivel (%)",data:valores,backgroundColor:"rgba(9,74,75,0.12)",borderColor:"#094a4b",borderWidth:2,pointBackgroundColor:"#8DC63F",pointBorderColor:"#094a4b",pointRadius:5,pointHoverRadius:7}]},options:{responsive:true,maintainAspectRatio:false,scales:{r:{min:0,max:100,ticks:{stepSize:25,callback:v=>v+"%",font:{size:10},backdropColor:"transparent"},pointLabels:{font:{size:11},color:"#333"},grid:{color:"rgba(9,74,75,0.15)"},angleLines:{color:"rgba(9,74,75,0.15)"}}},plugins:{legend:{display:false}}}});
 
   const PREGUNTAS_DETALLE={
     sst:[{k:"sst_1",lbl:"SG-SST",mx:3},{k:"sst_2",lbl:"COPASST",mx:2},{k:"sst_3",lbl:"Brigadas",mx:2},{k:"sst_4",lbl:"EPP",mx:2},{k:"sst_5",lbl:"Accid.",mx:2}],
@@ -1497,7 +1497,7 @@ async function generarPDFDiag() {
   const {jsPDF} = window.jspdf;
   const doc = new jsPDF({orientation:"portrait",unit:"mm",format:"a4"});
   const W=210, MARGIN=14, CW=W-MARGIN*2;
-  const VERDE=[0,104,71], VERDE_PIST=[141,198,63], GRIS=[58,58,58], BLANCO=[255,255,255];
+  const VERDE=[9,74,75], VERDE_PIST=[141,198,63], GRIS=[58,58,58], BLANCO=[255,255,255];
   const NARANJA=[245,127,23], ROJO=[198,40,40], VERDE_ALTO=[46,125,50];
 
   // ── Logos desde el DOM
@@ -1546,66 +1546,68 @@ async function generarPDFDiag() {
 
   // ── Helper: dibujar header en cada página
   function drawHeader(isFirst) {
-    const hH = isFirst ? 40 : 16; // altura header
+    const hH      = isFirst ? 40 : 16;
+    const blanco  = [255,255,255];
+    // 70% del ancho = zona blanca pura, 30% = difuminado hacia #094a4b
+    const blancoPct = 0.70;
+    const blancoEnd = Math.round(W * blancoPct);   // ~147mm
+    const degradSteps = 32;
 
-    // Degradado blanco → verde simulado con bandas (jsPDF no tiene degradado nativo)
-    const steps = 28;
-    for (let i = 0; i < steps; i++) {
-      const t = i / steps; // 0=blanco, 1=verde
-      const r = Math.round(255 + (VERDE[0]-255)*t);
-      const g = Math.round(255 + (VERDE[1]-255)*t);
-      const b2 = Math.round(255 + (VERDE[2]-255)*t);
-      const bandW = isFirst ? 85 : 60; // zona del degradado (lado izquierdo)
-      const bx = (bandW / steps) * i;
-      const bw = (bandW / steps) + 0.5;
-      doc.setFillColor(r, g, b2);
+    // Zona 1: blanco sólido (0 → blancoEnd)
+    doc.setFillColor(...blanco);
+    doc.rect(0, 0, blancoEnd, hH, "F");
+
+    // Zona 2: degradado blanco → #094a4b (blancoEnd → W)
+    const degW = W - blancoEnd;
+    for (let i = 0; i < degradSteps; i++) {
+      const t  = i / degradSteps;
+      const r2 = Math.round(255 + (VERDE[0] - 255) * t);
+      const g2 = Math.round(255 + (VERDE[1] - 255) * t);
+      const b3 = Math.round(255 + (VERDE[2] - 255) * t);
+      const bx = blancoEnd + (degW / degradSteps) * i;
+      const bw = (degW / degradSteps) + 0.5;
+      doc.setFillColor(r2, g2, b3);
       doc.rect(bx, 0, bw, hH, "F");
     }
-    // Resto del header en verde sólido
-    const bandW = isFirst ? 85 : 60;
+    // Rematar con verde sólido al final para evitar hueco
     doc.setFillColor(...VERDE);
-    doc.rect(bandW, 0, W - bandW, hH, "F");
+    doc.rect(blancoEnd + degW - 1, 0, 2, hH, "F");
 
     // Línea pistacho inferior
     doc.setFillColor(...VERDE_PIST);
     doc.rect(0, hH - 1.5, W, 1.5, "F");
 
-    // ── LOGOS: ambos a la izquierda, zona blanca del degradado
-    const logoY   = isFirst ? 7   : 3;
-    const logoH1  = isFirst ? 18  : 10;
-    const logoH2  = isFirst ? 14  : 9;
-    const logoW1  = isFirst ? 38  : 24;
-    const logoW2  = isFirst ? 30  : 22;
-    const gap     = isFirst ? 4   : 3;
-    // Logo 1 en posición MARGIN
-    try {
-      if (logo1Src) doc.addImage(logo1Src,"JPEG", MARGIN, logoY, logoW1, logoH1);
-    } catch(e){}
-    // Logo 2 justo a continuación
-    try {
-      if (logo2Src) doc.addImage(logo2Src,"PNG", MARGIN + logoW1 + gap, logoY + (isFirst?2:0.5), logoW2, logoH2);
-    } catch(e){}
+    // ── LOGOS: ambos a la izquierda sobre la zona blanca
+    const logoY  = isFirst ? 6   : 3;
+    const logoH1 = isFirst ? 20  : 10;
+    const logoH2 = isFirst ? 16  : 9;
+    const logoW1 = isFirst ? 42  : 26;
+    const logoW2 = isFirst ? 32  : 22;
+    const gap    = isFirst ? 5   : 4;
+    try { if (logo1Src) doc.addImage(logo1Src,"JPEG", MARGIN, logoY, logoW1, logoH1); } catch(e){}
+    try { if (logo2Src) doc.addImage(logo2Src,"PNG",  MARGIN+logoW1+gap, logoY+(isFirst?2:0.5), logoW2, logoH2); } catch(e){}
 
-    // Separador vertical entre logos y texto
-    const sepX = MARGIN + logoW1 + gap + logoW2 + 5;
-    doc.setDrawColor(255,255,255,0.4);
-    doc.setLineWidth(0.4);
-    doc.line(sepX, isFirst?5:3, sepX, hH-4);
+    // Separador vertical sutil (en zona de degradado)
+    const sepX = MARGIN + logoW1 + gap + logoW2 + 8;
+    doc.setDrawColor(9,74,75); doc.setLineWidth(0.3);
+    doc.line(sepX, isFirst?4:3, sepX, hH-4);
 
-    // Texto del header (a la derecha de los logos, ya en zona verde)
+    // Texto del header (sobre la zona de degradado/verde)
     if (isFirst) {
       const txtX = sepX + 6;
-      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(11.5);
-      doc.text("DIAGNOSTICO EMPRESARIAL INTEGRAL", txtX, 15);
-      doc.setFont("helvetica","normal"); doc.setFontSize(8);
-      doc.text("Agencia de Empleo y Emprendimiento", txtX, 22);
-      doc.text("Comfenalco Antioquia - Servicio Publico de Empleo", txtX, 28);
+      doc.setTextColor(...VERDE); doc.setFont("helvetica","bold"); doc.setFontSize(11);
+      doc.text("DIAGNOSTICO EMPRESARIAL", txtX, 14);
+      doc.setFontSize(9);
+      doc.text("INTEGRAL", txtX, 20);
+      doc.setFont("helvetica","normal"); doc.setFontSize(7.5); doc.setTextColor(60,60,60);
+      doc.text("Agencia de Empleo y Emprendimiento", txtX, 27);
+      doc.text("Comfenalco Antioquia · Servicio Publico de Empleo", txtX, 32);
       doc.setFontSize(7);
-      doc.text("Generado: " + new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"}), txtX, 34);
+      doc.text("Generado: " + new Date().toLocaleDateString("es-CO",{year:"numeric",month:"long",day:"numeric"}), txtX, 37);
     } else {
       const txtX = sepX + 5;
-      doc.setTextColor(...BLANCO); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
-      doc.text("DIAGNOSTICO EMPRESARIAL - " + (d.nombre_empresa||empresaActual).toUpperCase().slice(0,35), txtX, 10);
+      doc.setTextColor(...VERDE); doc.setFont("helvetica","bold"); doc.setFontSize(7.5);
+      doc.text("DIAGNOSTICO EMPRESARIAL - " + (d.nombre_empresa||empresaActual).toUpperCase().slice(0,32), txtX, 10);
     }
   }
 
@@ -1692,19 +1694,26 @@ async function generarPDFDiag() {
 
   if (imgDona || imgRadar) {
     y2 = sectionTitle("DISTRIBUCION DE NIVELES Y PERFIL DE MADUREZ", y2);
-    const halfW = CW/2 - 6;
-    const chartH = 85;
+
+    // ── DONA: cuadrada, centrada horizontalmente
     if (imgDona) {
-      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
-      doc.text("Distribucion de niveles", MARGIN + halfW/2, y2+4, {align:"center"});
-      doc.addImage(imgDona,"PNG", MARGIN, y2+8, halfW, chartH);
+      const donaSize = 90;  // cuadrado perfecto
+      const donaX   = MARGIN + (CW - donaSize) / 2;
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...GRIS);
+      doc.text("Distribucion de niveles por area", W/2, y2+5, {align:"center"});
+      doc.addImage(imgDona,"PNG", donaX, y2+8, donaSize, donaSize);
+      y2 += donaSize + 14;
     }
+
+    // ── RADAR: debajo de la dona, proporcional (cuadrado)
     if (imgRadar) {
-      doc.setFont("helvetica","bold"); doc.setFontSize(8); doc.setTextColor(...GRIS);
-      doc.text("Perfil de madurez empresarial", MARGIN + halfW + 10 + halfW/2, y2+4, {align:"center"});
-      doc.addImage(imgRadar,"PNG", MARGIN+halfW+10, y2+8, halfW, chartH);
+      const radarSize = 110;
+      const radarX   = MARGIN + (CW - radarSize) / 2;
+      doc.setFont("helvetica","bold"); doc.setFontSize(9); doc.setTextColor(...GRIS);
+      doc.text("Perfil de madurez empresarial", W/2, y2+4, {align:"center"});
+      doc.addImage(imgRadar,"PNG", radarX, y2+8, radarSize, radarSize);
+      y2 += radarSize + 10;
     }
-    y2 += chartH + 20;
   }
   drawFooter(2, "...");
 

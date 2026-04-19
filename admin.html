@@ -184,16 +184,25 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
   .no-data { text-align: center; padding: 60px 20px; color: #aaa; font-size: 16px; display: none; }
 
+  @media(max-width: 700px) {
+    .charts-grid { grid-template-columns: 1fr; }
+    .selector-card { flex-direction: column; align-items: stretch; }
+  }
+
   /* DIAG CHARTS */
   .diag-barras-wrap { position: relative; height: 300px; }
   .diag-dona-radar-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 16px; }
   .diag-chart-square { position: relative; width: 100%; max-width: 360px; margin: 0 auto; padding-bottom: min(100%, 360px); }
   .diag-chart-square canvas { position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; }
+  .diag-detalle-grid { display: grid; grid-template-columns: 1fr; gap: 16px; margin-top: 16px; }
+  .area-chart-wrap { position: relative; height: 180px; }
 
   @media(min-width: 701px) {
     .diag-barras-wrap { height: 260px; }
     .diag-dona-radar-grid { grid-template-columns: 1fr 1fr; }
     .diag-chart-square { max-width: none; padding-bottom: 100%; }
+    .diag-detalle-grid { grid-template-columns: 1fr 1fr; }
+    .area-chart-wrap { height: 140px; }
   }
 </style>
 </head>
@@ -323,7 +332,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
               <canvas id="chartDiagBarras"></canvas>
             </div>
           </div>
-          <!-- Dona + Radar: apiladas siempre (una arriba, una abajo) -->
+          <!-- Dona + Radar: una arriba, una abajo en móvil -->
           <div class="diag-dona-radar-grid">
             <div style="background:#f8fcfa;border-radius:12px;padding:16px">
               <h4 style="color:var(--verde);margin:0 0 10px 0;font-size:13px;font-weight:600;text-align:center">Distribución de Niveles</h4>
@@ -343,7 +352,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
         <!-- DETALLE VISUAL POR ÁREA -->
         <div class="rec-card" id="diagDetalleSection" style="margin-top:20px">
           <h3>🔍 Detalle por Área</h3>
-          <div id="diagDetalleGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px"></div>
+          <div id="diagDetalleGrid" class="diag-detalle-grid"></div>
         </div>
         </div>
         <div style="text-align:center;margin-bottom:40px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
@@ -449,9 +458,8 @@ async function confirmarBorrarEmpresa() {
   const emp = sel ? sel.value : "";
   if (!emp) { alert("Seleccione una empresa primero."); return; }
 
-  // Contar registros antes de borrar para verificar que hay datos
-  const { data: prevData, error: countErr } = await supabaseClient
-    .from("respuestas_clima").select("id", { count: "exact" }).eq("empresa", emp);
+  const { data: prevData } = await supabaseClient
+    .from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp);
   const totalReg = prevData ? prevData.length : 0;
 
   if (!confirm(`¿Está seguro de eliminar la empresa "${emp}" y TODOS sus datos?\n\nRegistros a eliminar: ${totalReg}\n\nEsta acción NO se puede deshacer.`)) return;
@@ -459,34 +467,30 @@ async function confirmarBorrarEmpresa() {
   const btnBorrar = document.querySelector(".btn-borrar-empresa");
   if (btnBorrar) { btnBorrar.disabled = true; btnBorrar.textContent = "Eliminando..."; }
   try {
-    const { error, data: delData } = await supabaseClient
-      .from("respuestas_clima")
+    const { error } = await supabaseClient
+      .from("diagnosticos_empresariales")
       .delete()
-      .eq("empresa", emp)
-      .select();
+      .eq("nombre_empresa", emp);
 
     if (error) throw error;
 
-    // Verificar que realmente se borraron los registros
     const { data: postData } = await supabaseClient
-      .from("respuestas_clima").select("id").eq("empresa", emp);
+      .from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp);
     const quedaron = postData ? postData.length : 0;
 
     if (quedaron > 0) {
-      throw new Error(`No se pudieron eliminar todos los registros. Quedan ${quedaron} registros. Verifique los permisos de la base de datos (RLS en Supabase).`);
+      throw new Error(`No se pudieron eliminar todos los registros. Quedan ${quedaron}. Verifique los permisos RLS en Supabase.`);
     }
 
-    // Limpiar UI
     const optToRemove = sel.querySelector(`option[value="${emp}"]`);
     if (optToRemove) optToRemove.remove();
     sel.value = "";
-    document.getElementById("linkEncuesta").value = "";
-    const noData = document.getElementById("noData");
-    if (noData) noData.style.display = "block";
-    const resultados = document.getElementById("resultados");
-    if (resultados) resultados.style.display = "none";
+    const linkDiag = document.getElementById("linkDiag");
+    if (linkDiag) linkDiag.value = "";
     if (typeof empresaActual !== "undefined") empresaActual = "";
-    if (typeof datosActuales !== "undefined") datosActuales = [];
+    if (typeof diagActuales !== "undefined") diagActuales = [];
+    const secDiag = document.getElementById("diagWrap");
+    if (secDiag) secDiag.style.display = "none";
     alert(`✅ Empresa "${emp}" y sus ${totalReg} registros fueron eliminados correctamente.`);
     await cargarEmpresas();
   } catch(e) {
@@ -497,14 +501,9 @@ async function confirmarBorrarEmpresa() {
 }
 
 async function cargarEmpresas() {
-  // Buscar empresas en ambas tablas
-  const [r1, r2] = await Promise.all([
-    supabaseClient.from("respuestas_clima").select("empresa"),
-    supabaseClient.from("diagnosticos_empresariales").select("nombre_empresa")
-  ]);
-  const set1 = (r1.data || []).map(r => r.empresa).filter(Boolean);
-  const set2 = (r2.data || []).map(r => r.nombre_empresa).filter(Boolean);
-  const empresas = [...new Set([...set1, ...set2])].sort();
+  const { data } = await supabaseClient
+    .from("diagnosticos_empresariales").select("nombre_empresa");
+  const empresas = [...new Set((data || []).map(r => r.nombre_empresa).filter(Boolean))].sort();
   const sel = document.getElementById("selEmpresa");
   sel.innerHTML = '<option value="">-- Seleccione una empresa --</option>';
   empresas.forEach(e => {
@@ -536,27 +535,9 @@ function copiarLink() {
 async function cargarDatos() {
   empresaActual = document.getElementById("selEmpresa").value;
   if (!empresaActual) { alert("Seleccione una empresa."); return; }
-
-  // Actualizar link de diagnóstico también
   const base = window.location.href.replace(/\/[^/]*$/, '');
   document.getElementById("linkDiag").value = `${base}/diagnostico_empresarial.html?empresa=${encodeURIComponent(empresaActual)}`;
-
-  const { data, error } = await supabaseClient
-    .from("respuestas_clima")
-    .select("*")
-    .eq("empresa", empresaActual);
-
-  if (error) { alert("Error al cargar: " + error.message); return; }
-
-  datosActuales = data;
-  if (!data || data.length < 3) {
-    document.getElementById("dashWrap").style.display = "none";
-    document.getElementById("noData").style.display = "block";
-    return;
-  }
-  document.getElementById("noData").style.display = "none";
-  document.getElementById("dashWrap").style.display = "block";
-  renderDashboard(data);
+  cargarDiagnosticos(empresaActual);
 }
 
 // ── RENDER DASHBOARD ───────────────────────────────────────
@@ -1491,7 +1472,7 @@ function renderGraficasDiag(d) {
     const color=nivel==="alto"?"#2e7d32":nivel==="medio"?"#f57f17":"#c62828";
     const bgColor=nivel==="alto"?"#e8f5e9":nivel==="medio"?"#fff8e1":"#fce4ec";
     const pct=valores[bi];
-    detalleHTML+=`<div style="background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid ${color}33"><div style="background:${bgColor};padding:12px 14px;border-bottom:2px solid ${color}22"><div style="display:flex;justify-content:space-between;align-items:center"><strong style="color:${color};font-size:13px">${b.titulo}</strong><span style="background:${color};color:white;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700">${nivelLabel(nivel)} · ${pct}%</span></div></div><div style="padding:12px 14px"><div style="position:relative;height:120px"><canvas id="chartArea_${b.id}"></canvas></div></div><div style="padding:0 14px 12px 14px"><div style="font-size:11px;color:#666;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px">Nivel de madurez</div><div style="background:#e9ecef;border-radius:6px;height:10px;overflow:hidden"><div style="background:${color};width:${pct}%;height:100%;border-radius:6px;transition:width 0.6s ease"></div></div><div style="font-size:11px;color:${color};font-weight:700;margin-top:4px;text-align:right">${pct}%</div></div></div>`;
+    detalleHTML+=`<div style="background:white;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.08);border:1px solid ${color}33"><div style="background:${bgColor};padding:12px 14px;border-bottom:2px solid ${color}22"><div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px"><strong style="color:${color};font-size:13px">${b.titulo}</strong><span style="background:${color};color:white;padding:3px 11px;border-radius:20px;font-size:11px;font-weight:700">${nivelLabel(nivel)} · ${pct}%</span></div></div><div style="padding:12px 14px"><div class="area-chart-wrap"><canvas id="chartArea_${b.id}"></canvas></div></div><div style="padding:0 14px 12px 14px"><div style="font-size:11px;color:#666;font-weight:600;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.3px">Nivel de madurez</div><div style="background:#e9ecef;border-radius:6px;height:10px;overflow:hidden"><div style="background:${color};width:${pct}%;height:100%;border-radius:6px;transition:width 0.6s ease"></div></div><div style="font-size:11px;color:${color};font-weight:700;margin-top:4px;text-align:right">${pct}%</div></div></div>`;
   });
   grid.innerHTML=detalleHTML;
   BLOQUES_DIAG.forEach((b,bi)=>{
@@ -1502,7 +1483,7 @@ function renderGraficasDiag(d) {
     const color=nivel==="alto"?"#2e7d32":nivel==="medio"?"#f57f17":"#c62828";
     const ctx=document.getElementById(`chartArea_${b.id}`);
     if(!ctx)return;
-    new Chart(ctx.getContext("2d"),{type:"bar",data:{labels:pLabels,datasets:[{data:pVals,backgroundColor:color+"99",borderColor:color,borderWidth:1.5,borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+c.raw+"%"}}},scales:{x:{ticks:{font:{size:9},maxRotation:35},grid:{display:false}},y:{min:0,max:100,ticks:{callback:v=>v+"%",font:{size:9}},grid:{color:"rgba(0,0,0,0.05)"}}}}});
+    new Chart(ctx.getContext("2d"),{type:"bar",data:{labels:pLabels,datasets:[{data:pVals,backgroundColor:color+"99",borderColor:color,borderWidth:1.5,borderRadius:4,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>" "+c.raw+"%"}}},scales:{x:{ticks:{font:{size: window.innerWidth < 600 ? 7 : 9},maxRotation:45,minRotation:30,autoSkip:false},grid:{display:false}},y:{min:0,max:100,ticks:{callback:v=>v+"%",font:{size:9}},grid:{color:"rgba(0,0,0,0.05)"}}}}});
   });
 }
 

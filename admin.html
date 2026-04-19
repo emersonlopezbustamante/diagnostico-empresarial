@@ -133,17 +133,14 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   .stat-card.danger .val { color: var(--rojo); }
 
   /* CHARTS */
-  .charts-grid { display: grid; grid-template-columns: 1fr; gap: 24px; margin-bottom: 28px; }
+  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 28px; }
   .chart-card {
     background: white; border-radius: 16px; padding: 24px;
     box-shadow: var(--sombra);
   }
   .chart-card.full { grid-column: 1 / -1; }
   .chart-card h3 { font-family: 'Playfair Display', serif; font-size: 17px; color: var(--verde); margin-bottom: 18px; }
-  .chart-wrap { position: relative; height: 340px; }
-  @media(min-width: 701px) {
-    .chart-wrap { height: 380px; }
-  }
+  .chart-wrap { position: relative; height: 260px; }
 
   /* DIMENSIONES TABLE */
   .dim-table { width: 100%; border-collapse: collapse; font-size: 14px; }
@@ -188,6 +185,7 @@ const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
   .no-data { text-align: center; padding: 60px 20px; color: #aaa; font-size: 16px; display: none; }
 
   @media(max-width: 700px) {
+    .charts-grid { grid-template-columns: 1fr; }
     .selector-card { flex-direction: column; align-items: stretch; }
   }
 </style>
@@ -445,45 +443,62 @@ async function confirmarBorrarEmpresa() {
   const emp = sel ? sel.value : "";
   if (!emp) { alert("Seleccione una empresa primero."); return; }
 
-  // Contar registros antes de borrar para verificar que hay datos
-  const { data: prevData, error: countErr } = await supabaseClient
-    .from("respuestas_clima").select("id", { count: "exact" }).eq("empresa", emp);
-  const totalReg = prevData ? prevData.length : 0;
+  // Contar registros en ambas tablas
+  const [r1, r2] = await Promise.all([
+    supabaseClient.from("respuestas_clima").select("id").eq("empresa", emp),
+    supabaseClient.from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp)
+  ]);
+  const totalClima = r1.data ? r1.data.length : 0;
+  const totalDiag  = r2.data ? r2.data.length : 0;
+  const totalReg   = totalClima + totalDiag;
 
-  if (!confirm(`¿Está seguro de eliminar la empresa "${emp}" y TODOS sus datos?\n\nRegistros a eliminar: ${totalReg}\n\nEsta acción NO se puede deshacer.`)) return;
+  if (!confirm(`¿Está seguro de eliminar la empresa "${emp}" y TODOS sus datos?\n\nRegistros clima: ${totalClima}\nRegistros diagnóstico: ${totalDiag}\nTotal: ${totalReg}\n\nEsta acción NO se puede deshacer.`)) return;
 
   const btnBorrar = document.querySelector(".btn-borrar-empresa");
   if (btnBorrar) { btnBorrar.disabled = true; btnBorrar.textContent = "Eliminando..."; }
+
   try {
-    const { error, data: delData } = await supabaseClient
-      .from("respuestas_clima")
-      .delete()
-      .eq("empresa", emp)
-      .select();
+    // Borrar de respuestas_clima
+    if (totalClima > 0) {
+      const { error: e1 } = await supabaseClient
+        .from("respuestas_clima")
+        .delete()
+        .eq("empresa", emp);
+      if (e1) throw new Error("Error en respuestas_clima: " + e1.message);
+    }
 
-    if (error) throw error;
+    // Borrar de diagnosticos_empresariales
+    if (totalDiag > 0) {
+      const { error: e2 } = await supabaseClient
+        .from("diagnosticos_empresariales")
+        .delete()
+        .eq("nombre_empresa", emp);
+      if (e2) throw new Error("Error en diagnosticos_empresariales: " + e2.message);
+    }
 
-    // Verificar que realmente se borraron los registros
-    const { data: postData } = await supabaseClient
-      .from("respuestas_clima").select("id").eq("empresa", emp);
-    const quedaron = postData ? postData.length : 0;
-
+    // Verificar que se borraron
+    const [v1, v2] = await Promise.all([
+      supabaseClient.from("respuestas_clima").select("id").eq("empresa", emp),
+      supabaseClient.from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp)
+    ]);
+    const quedaron = (v1.data ? v1.data.length : 0) + (v2.data ? v2.data.length : 0);
     if (quedaron > 0) {
-      throw new Error(`No se pudieron eliminar todos los registros. Quedan ${quedaron} registros. Verifique los permisos de la base de datos (RLS en Supabase).`);
+      throw new Error(`Quedan ${quedaron} registros sin eliminar. Verifique los permisos RLS en Supabase.`);
     }
 
     // Limpiar UI
     const optToRemove = sel.querySelector(`option[value="${emp}"]`);
     if (optToRemove) optToRemove.remove();
     sel.value = "";
-    document.getElementById("linkEncuesta").value = "";
+    const linkEnc = document.getElementById("linkEncuesta");
+    if (linkEnc) linkEnc.value = "";
     const noData = document.getElementById("noData");
     if (noData) noData.style.display = "block";
     const resultados = document.getElementById("resultados");
     if (resultados) resultados.style.display = "none";
     if (typeof empresaActual !== "undefined") empresaActual = "";
     if (typeof datosActuales !== "undefined") datosActuales = [];
-    alert(`✅ Empresa "${emp}" y sus ${totalReg} registros fueron eliminados correctamente.`);
+    alert(`✅ Empresa "${emp}" eliminada correctamente (${totalReg} registros borrados).`);
     await cargarEmpresas();
   } catch(e) {
     alert("❌ Error al eliminar: " + e.message);

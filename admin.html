@@ -443,62 +443,41 @@ async function confirmarBorrarEmpresa() {
   const emp = sel ? sel.value : "";
   if (!emp) { alert("Seleccione una empresa primero."); return; }
 
-  // Contar registros en ambas tablas
-  const [r1, r2] = await Promise.all([
-    supabaseClient.from("respuestas_clima").select("id").eq("empresa", emp),
-    supabaseClient.from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp)
-  ]);
-  const totalClima = r1.data ? r1.data.length : 0;
-  const totalDiag  = r2.data ? r2.data.length : 0;
-  const totalReg   = totalClima + totalDiag;
+  const { data: prevData } = await supabaseClient
+    .from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp);
+  const totalReg = prevData ? prevData.length : 0;
 
-  if (!confirm(`¿Está seguro de eliminar la empresa "${emp}" y TODOS sus datos?\n\nRegistros clima: ${totalClima}\nRegistros diagnóstico: ${totalDiag}\nTotal: ${totalReg}\n\nEsta acción NO se puede deshacer.`)) return;
+  if (!confirm(`¿Está seguro de eliminar la empresa "${emp}" y TODOS sus datos?\n\nRegistros a eliminar: ${totalReg}\n\nEsta acción NO se puede deshacer.`)) return;
 
   const btnBorrar = document.querySelector(".btn-borrar-empresa");
   if (btnBorrar) { btnBorrar.disabled = true; btnBorrar.textContent = "Eliminando..."; }
-
   try {
-    // Borrar de respuestas_clima
-    if (totalClima > 0) {
-      const { error: e1 } = await supabaseClient
-        .from("respuestas_clima")
-        .delete()
-        .eq("empresa", emp);
-      if (e1) throw new Error("Error en respuestas_clima: " + e1.message);
-    }
+    const { error } = await supabaseClient
+      .from("diagnosticos_empresariales")
+      .delete()
+      .eq("nombre_empresa", emp);
 
-    // Borrar de diagnosticos_empresariales
-    if (totalDiag > 0) {
-      const { error: e2 } = await supabaseClient
-        .from("diagnosticos_empresariales")
-        .delete()
-        .eq("nombre_empresa", emp);
-      if (e2) throw new Error("Error en diagnosticos_empresariales: " + e2.message);
-    }
+    if (error) throw error;
 
-    // Verificar que se borraron
-    const [v1, v2] = await Promise.all([
-      supabaseClient.from("respuestas_clima").select("id").eq("empresa", emp),
-      supabaseClient.from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp)
-    ]);
-    const quedaron = (v1.data ? v1.data.length : 0) + (v2.data ? v2.data.length : 0);
+    const { data: postData } = await supabaseClient
+      .from("diagnosticos_empresariales").select("id").eq("nombre_empresa", emp);
+    const quedaron = postData ? postData.length : 0;
+
     if (quedaron > 0) {
-      throw new Error(`Quedan ${quedaron} registros sin eliminar. Verifique los permisos RLS en Supabase.`);
+      throw new Error(`No se pudieron eliminar todos los registros. Quedan ${quedaron}. Verifique los permisos RLS en Supabase.`);
     }
 
     // Limpiar UI
     const optToRemove = sel.querySelector(`option[value="${emp}"]`);
     if (optToRemove) optToRemove.remove();
     sel.value = "";
-    const linkEnc = document.getElementById("linkEncuesta");
-    if (linkEnc) linkEnc.value = "";
-    const noData = document.getElementById("noData");
-    if (noData) noData.style.display = "block";
-    const resultados = document.getElementById("resultados");
-    if (resultados) resultados.style.display = "none";
+    const linkDiag = document.getElementById("linkDiag");
+    if (linkDiag) linkDiag.value = "";
     if (typeof empresaActual !== "undefined") empresaActual = "";
-    if (typeof datosActuales !== "undefined") datosActuales = [];
-    alert(`✅ Empresa "${emp}" eliminada correctamente (${totalReg} registros borrados).`);
+    if (typeof diagActuales !== "undefined") diagActuales = [];
+    const secDiag = document.getElementById("secDiag");
+    if (secDiag) secDiag.innerHTML = "";
+    alert(`✅ Empresa "${emp}" y sus ${totalReg} registros fueron eliminados correctamente.`);
     await cargarEmpresas();
   } catch(e) {
     alert("❌ Error al eliminar: " + e.message);
@@ -508,14 +487,9 @@ async function confirmarBorrarEmpresa() {
 }
 
 async function cargarEmpresas() {
-  // Buscar empresas en ambas tablas
-  const [r1, r2] = await Promise.all([
-    supabaseClient.from("respuestas_clima").select("empresa"),
-    supabaseClient.from("diagnosticos_empresariales").select("nombre_empresa")
-  ]);
-  const set1 = (r1.data || []).map(r => r.empresa).filter(Boolean);
-  const set2 = (r2.data || []).map(r => r.nombre_empresa).filter(Boolean);
-  const empresas = [...new Set([...set1, ...set2])].sort();
+  const { data } = await supabaseClient
+    .from("diagnosticos_empresariales").select("nombre_empresa");
+  const empresas = [...new Set((data || []).map(r => r.nombre_empresa).filter(Boolean))].sort();
   const sel = document.getElementById("selEmpresa");
   sel.innerHTML = '<option value="">-- Seleccione una empresa --</option>';
   empresas.forEach(e => {
@@ -548,26 +522,11 @@ async function cargarDatos() {
   empresaActual = document.getElementById("selEmpresa").value;
   if (!empresaActual) { alert("Seleccione una empresa."); return; }
 
-  // Actualizar link de diagnóstico también
+  // Actualizar link de diagnóstico
   const base = window.location.href.replace(/\/[^/]*$/, '');
   document.getElementById("linkDiag").value = `${base}/diagnostico_empresarial.html?empresa=${encodeURIComponent(empresaActual)}`;
 
-  const { data, error } = await supabaseClient
-    .from("respuestas_clima")
-    .select("*")
-    .eq("empresa", empresaActual);
-
-  if (error) { alert("Error al cargar: " + error.message); return; }
-
-  datosActuales = data;
-  if (!data || data.length < 3) {
-    document.getElementById("dashWrap").style.display = "none";
-    document.getElementById("noData").style.display = "block";
-    return;
-  }
-  document.getElementById("noData").style.display = "none";
-  document.getElementById("dashWrap").style.display = "block";
-  renderDashboard(data);
+  cargarDiagnosticos(empresaActual);
 }
 
 // ── RENDER DASHBOARD ───────────────────────────────────────
